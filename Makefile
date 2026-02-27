@@ -269,53 +269,30 @@ usb-deploy: build-all $(USB_DIR)
 	@echo 'app_id: "YOUR_APP_ID"' >> $(USB_DIR)/packages/config-templates/feishu-adapter.yaml.template
 	@echo 'app_secret: "YOUR_APP_SECRET"' >> $(USB_DIR)/packages/config-templates/feishu-adapter.yaml.template
 
-	@echo "  -> Creating autorun scripts..."
+	@echo "  -> Copying installer scripts from template..."
+	@cp ./usb-template/install.bat $(USB_DIR)/install.bat
+	@cp ./usb-template/install.ps1 $(USB_DIR)/install.ps1
+	@cp ./usb-template/install-mac.command $(USB_DIR)/install-mac.command
+	@cp ./usb-template/install-linux.sh $(USB_DIR)/install-linux.sh
+	@chmod +x $(USB_DIR)/install-mac.command
+	@chmod +x $(USB_DIR)/install-linux.sh
+
+	@echo "  -> Copying improved autorun scripts..."
+	@cp ./usb-template/install.bat $(USB_DIR)/autorun/install.bat 2>/dev/null || true
+	@cp ./usb-template/install-mac.command $(USB_DIR)/autorun/install-mac.command 2>/dev/null || true
+	@cp ./usb-template/install-linux.sh $(USB_DIR)/autorun/install-linux.sh 2>/dev/null || true
+	@chmod +x $(USB_DIR)/autorun/install-mac.command 2>/dev/null || true
+	@chmod +x $(USB_DIR)/autorun/install-linux.sh 2>/dev/null || true
+
+	@echo "  -> Creating Windows autorun.inf..."
 	@echo '[autorun]' > $(USB_DIR)/autorun/autorun.inf
-	@echo 'open=installers\openclaw-installer-windows-amd64.exe' >> $(USB_DIR)/autorun/autorun.inf
+	@echo 'open=install.bat' >> $(USB_DIR)/autorun/autorun.inf
 	@echo 'label=OpenClaw Installer' >> $(USB_DIR)/autorun/autorun.inf
 	@echo 'icon=resources\icons\openclaw.ico' >> $(USB_DIR)/autorun/autorun.inf
+	@echo 'action=Install OpenClaw' >> $(USB_DIR)/autorun/autorun.inf
 
-	@echo '#!/bin/bash' > $(USB_DIR)/autorun/install-mac.command
-	@echo 'cd "$(dirname "$0")/.."' >> $(USB_DIR)/autorun/install-mac.command
-	@echo '' >> $(USB_DIR)/autorun/install-mac.command
-	@echo '# Detect architecture' >> $(USB_DIR)/autorun/install-mac.command
-	@echo 'ARCH=$$(uname -m)' >> $(USB_DIR)/autorun/install-mac.command
-	@echo 'if [ "$$ARCH" = "arm64" ]; then' >> $(USB_DIR)/autorun/install-mac.command
-	@echo '    ./installers/$(PROJECT_NAME)-darwin-arm64' >> $(USB_DIR)/autorun/install-mac.command
-	@echo 'else' >> $(USB_DIR)/autorun/install-mac.command
-	@echo '    ./installers/$(PROJECT_NAME)-darwin-amd64' >> $(USB_DIR)/autorun/install-mac.command
-	@echo 'fi' >> $(USB_DIR)/autorun/install-mac.command
-	@chmod +x $(USB_DIR)/autorun/install-mac.command
-
-	@echo '#!/bin/bash' > $(USB_DIR)/autorun/install-linux.sh
-	@echo 'cd "$(dirname "$0")/.."' >> $(USB_DIR)/autorun/install-linux.sh
-	@echo '' >> $(USB_DIR)/autorun/install-linux.sh
-	@echo '# Detect architecture' >> $(USB_DIR)/autorun/install-linux.sh
-	@echo 'ARCH=$$(uname -m)' >> $(USB_DIR)/autorun/install-linux.sh
-	@echo 'if [ "$$ARCH" = "aarch64" ] || [ "$$ARCH" = "arm64" ]; then' >> $(USB_DIR)/autorun/install-linux.sh
-	@echo '    ./installers/$(PROJECT_NAME)-linux-arm64' >> $(USB_DIR)/autorun/install-linux.sh
-	@echo 'else' >> $(USB_DIR)/autorun/install-linux.sh
-	@echo '    ./installers/$(PROJECT_NAME)-linux-amd64' >> $(USB_DIR)/autorun/install-linux.sh
-	@echo 'fi' >> $(USB_DIR)/autorun/install-linux.sh
-	@chmod +x $(USB_DIR)/autorun/install-linux.sh
-
-	@echo "  -> Creating README..."
-	@echo '# OpenClaw Installer' > $(USB_DIR)/README.txt
-	@echo 'Version: $(VERSION)' >> $(USB_DIR)/README.txt
-	@echo 'Build Time: $(BUILD_TIME)' >> $(USB_DIR)/README.txt
-	@echo '' >> $(USB_DIR)/README.txt
-	@echo '## Quick Start' >> $(USB_DIR)/README.txt
-	@echo '' >> $(USB_DIR)/README.txt
-	@echo '### Windows' >> $(USB_DIR)/README.txt
-	@echo 'Double-click: installers\openclaw-installer-windows-amd64.exe' >> $(USB_DIR)/README.txt
-	@echo '' >> $(USB_DIR)/README.txt
-	@echo '### macOS' >> $(USB_DIR)/README.txt
-	@echo 'Double-click: autorun/install-mac.command' >> $(USB_DIR)/README.txt
-	@echo 'Or run: ./installers/openclaw-installer-darwin-*' >> $(USB_DIR)/README.txt
-	@echo '' >> $(USB_DIR)/README.txt
-	@echo '### Linux' >> $(USB_DIR)/README.txt
-	@echo 'Run: ./autorun/install-linux.sh' >> $(USB_DIR)/README.txt
-	@echo 'Or run: ./installers/openclaw-installer-linux-*' >> $(USB_DIR)/README.txt
+	@echo "  -> Copying README..."
+	@cp ./usb-template/README.txt $(USB_DIR)/README.txt
 
 	@echo "U盘 deployment structure created at $(USB_DIR)/"
 	@echo "Directory structure:"
