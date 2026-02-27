@@ -1,0 +1,13 @@
+{
+    "name": "feishu",
+    "type": "messaging",
+    "display_name": "飞书",
+    "version": "1.0.0",
+    "description": "飞书消息适配器",
+    "supported_platforms": ["windows", "darwin", "linux"],
+    "config_schema": {
+        "app_id": {"type": "string", "required": true},
+        "app_secret": {"type": "string", "required": true},
+        "encrypt_key": {"type": "string", "required": false}
+    }
+}

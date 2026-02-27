@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{.Title}} - OpenClaw 配置向导</title>
+    <link rel="stylesheet" href="/static/css/style.css">
+</head>
+<body>
+    <div class="container">
+        <header class="header">
+            <h1>OpenClaw 配置向导</h1>
+            <div class="progress-bar">
+                <div class="progress-step {{if ge .Step 1}}active{{end}} {{if gt .Step 1}}completed{{end}}">
+                    <span class="step-number">1</span>
+                    <span class="step-label">欢迎</span>
+                </div>
+                <div class="progress-step {{if ge .Step 2}}active{{end}} {{if gt .Step 2}}completed{{end}}">
+                    <span class="step-number">2</span>
+                    <span class="step-label">基础配置</span>
+                </div>
+                <div class="progress-step {{if ge .Step 3}}active{{end}} {{if gt .Step 3}}completed{{end}}">
+                    <span class="step-number">3</span>
+                    <span class="step-label">平台配置</span>
+                </div>
+                <div class="progress-step {{if ge .Step 4}}active{{end}} {{if gt .Step 4}}completed{{end}}">
+                    <span class="step-number">4</span>
+                    <span class="step-label">完成</span>
+                </div>
+            </div>
+        </header>
+
+        <main class="main-content">
+            {{template "content" .}}
+        </main>
+
+        <footer class="footer">
+            <p>OpenClaw - 企业级 AI 知识库助手</p>
+        </footer>
+    </div>
+
+    <script src="/static/js/app.js"></script>
+</body>
+</html>

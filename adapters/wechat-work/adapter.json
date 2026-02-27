@@ -1,0 +1,13 @@
+{
+    "name": "wechat-work",
+    "type": "messaging",
+    "display_name": "企业微信",
+    "version": "1.0.0",
+    "description": "企业微信消息适配器",
+    "supported_platforms": ["windows", "darwin", "linux"],
+    "config_schema": {
+        "corp_id": {"type": "string", "required": true},
+        "corp_secret": {"type": "string", "required": true},
+        "agent_id": {"type": "string", "required": true}
+    }
+}

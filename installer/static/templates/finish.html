@@ -1,0 +1,69 @@
+{{define "content"}}
+<div class="card finish-card">
+    <div class="finish-icon {{if .Success}}success{{else}}error{{end}}">
+        {{if .Success}}
+        <svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+            <polyline points="22 4 12 14.01 9 11.01"></polyline>
+        </svg>
+        {{else}}
+        <svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="10"></circle>
+            <line x1="15" y1="9" x2="9" y2="15"></line>
+            <line x1="9" y1="9" x2="15" y2="15"></line>
+        </svg>
+        {{end}}
+    </div>
+
+    {{if .Success}}
+    <h2>配置完成</h2>
+    <p class="description">
+        恭喜！OpenClaw 已成功配置。
+    </p>
+    <div class="config-summary">
+        <h3>配置摘要</h3>
+        <div class="summary-item">
+            <span class="label">AI 提供商：</span>
+            <span class="value">{{.Config.AIProvider}}</span>
+        </div>
+        <div class="summary-item">
+            <span class="label">AI 模型：</span>
+            <span class="value">{{.Config.AIModel}}</span>
+        </div>
+        <div class="summary-item">
+            <span class="label">服务端口：</span>
+            <span class="value">{{.Config.ServerPort}}</span>
+        </div>
+        <div class="summary-item">
+            <span class="label">启用平台：</span>
+            <span class="value">
+                {{if .Config.WeComEnabled}}企业微信 {{end}}
+                {{if .Config.DingTalkEnabled}}钉钉 {{end}}
+                {{if .Config.LarkEnabled}}飞书{{end}}
+            </span>
+        </div>
+    </div>
+    <div class="next-steps">
+        <h3>下一步</h3>
+        <ul>
+            <li>服务将在端口 <strong>{{.Config.ServerPort}}</strong> 上启动</li>
+            <li>请确保相关平台的回调 URL 指向此服务</li>
+            <li>查看日志确认服务正常运行</li>
+        </ul>
+    </div>
+    <div class="actions">
+        <button class="btn btn-primary" onclick="startService()">启动服务</button>
+        <a href="/setup/platform" class="btn btn-secondary">返回修改</a>
+    </div>
+    {{else}}
+    <h2>配置保存失败</h2>
+    <p class="description">
+        保存配置时发生错误，请检查网络连接后重试。
+    </p>
+    <p class="error-detail">{{.Error}}</p>
+    <div class="actions">
+        <a href="/setup/platform" class="btn btn-primary">返回重试</a>
+    </div>
+    {{end}}
+</div>
+{{end}}

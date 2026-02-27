@@ -1,0 +1,139 @@
+{{define "content"}}
+<div class="card">
+    <h2>平台配置</h2>
+    <p class="description">选择并配置至少一个企业通讯平台</p>
+
+    <form id="platformConfigForm" class="config-form" data-next="/setup/finish">
+        <div class="platform-tabs">
+            <button type="button" class="platform-tab {{if .Config.WeComEnabled}}active{{end}}" data-platform="wecom">
+                <span class="platform-icon">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
+                </span>
+                企业微信
+                <span class="toggle-switch">
+                    <input type="checkbox" id="wecomEnabled" name="wecomEnabled" {{if .Config.WeComEnabled}}checked{{end}}>
+                    <span class="slider"></span>
+                </span>
+            </button>
+            <button type="button" class="platform-tab {{if .Config.DingTalkEnabled}}active{{end}}" data-platform="dingtalk">
+                <span class="platform-icon">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"></rect><line x1="8" y1="21" x2="16" y2="21"></line><line x1="12" y1="17" x2="12" y2="21"></line></svg>
+                </span>
+                钉钉
+                <span class="toggle-switch">
+                    <input type="checkbox" id="dingtalkEnabled" name="dingtalkEnabled" {{if .Config.DingTalkEnabled}}checked{{end}}>
+                    <span class="slider"></span>
+                </span>
+            </button>
+            <button type="button" class="platform-tab {{if .Config.LarkEnabled}}active{{end}}" data-platform="lark">
+                <span class="platform-icon">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path><polyline points="22,6 12,13 2,6"></polyline></svg>
+                </span>
+                飞书
+                <span class="toggle-switch">
+                    <input type="checkbox" id="larkEnabled" name="larkEnabled" {{if .Config.LarkEnabled}}checked{{end}}>
+                    <span class="slider"></span>
+                </span>
+            </button>
+        </div>
+
+        <!-- 企业微信配置 -->
+        <div class="platform-config" id="wecomConfig" {{if not .Config.WeComEnabled}}style="display:none"{{end}}>
+            <h3>企业微信配置</h3>
+
+            <div class="form-group">
+                <label for="wecomCorpID">企业 ID (CorpID) <span class="required">*</span></label>
+                <input type="text" id="wecomCorpID" name="wecomCorpID" placeholder="wwxxxxxxxxxxxxxxxx" value="{{.Config.WeComCorpID}}">
+                <span class="help-text">在企业微信管理后台获取</span>
+                <span class="error-message" id="wecomCorpIDError"></span>
+            </div>
+
+            <div class="form-group">
+                <label for="wecomAgentID">应用 AgentID <span class="required">*</span></label>
+                <input type="text" id="wecomAgentID" name="wecomAgentID" placeholder="1000002" value="{{.Config.WeComAgentID}}">
+                <span class="help-text">自建应用的 AgentID</span>
+                <span class="error-message" id="wecomAgentIDError"></span>
+            </div>
+
+            <div class="form-group">
+                <label for="wecomSecret">应用 Secret <span class="required">*</span></label>
+                <input type="password" id="wecomSecret" name="wecomSecret" placeholder="输入应用 Secret" value="{{.Config.WeComSecret}}">
+                <span class="error-message" id="wecomSecretError"></span>
+            </div>
+
+            <div class="form-group">
+                <label for="wecomToken">消息 Token</label>
+                <input type="text" id="wecomToken" name="wecomToken" placeholder="可选，用于消息加解密" value="{{.Config.WeComToken}}">
+                <span class="error-message" id="wecomTokenError"></span>
+            </div>
+
+            <div class="form-group">
+                <label for="wecomEncodingAESKey">消息 EncodingAESKey</label>
+                <input type="text" id="wecomEncodingAESKey" name="wecomEncodingAESKey" placeholder="可选，用于消息加解密" value="{{.Config.WeComEncodingAESKey}}">
+                <span class="error-message" id="wecomEncodingAESKeyError"></span>
+            </div>
+        </div>
+
+        <!-- 钉钉配置 -->
+        <div class="platform-config" id="dingtalkConfig" {{if not .Config.DingTalkEnabled}}style="display:none"{{end}}>
+            <h3>钉钉配置</h3>
+
+            <div class="form-group">
+                <label for="dingtalkAppKey">AppKey <span class="required">*</span></label>
+                <input type="text" id="dingtalkAppKey" name="dingtalkAppKey" placeholder="dingxxxxxxxxxxxxxxxx" value="{{.Config.DingTalkAppKey}}">
+                <span class="error-message" id="dingtalkAppKeyError"></span>
+            </div>
+
+            <div class="form-group">
+                <label for="dingtalkAppSecret">AppSecret <span class="required">*</span></label>
+                <input type="password" id="dingtalkAppSecret" name="dingtalkAppSecret" placeholder="输入 AppSecret" value="{{.Config.DingTalkAppSecret}}">
+                <span class="error-message" id="dingtalkAppSecretError"></span>
+            </div>
+
+            <div class="form-group">
+                <label for="dingtalkRobotCode">机器人 Code</label>
+                <input type="text" id="dingtalkRobotCode" name="dingtalkRobotCode" placeholder="可选，企业内部机器人 Code" value="{{.Config.DingTalkRobotCode}}">
+                <span class="error-message" id="dingtalkRobotCodeError"></span>
+            </div>
+        </div>
+
+        <!-- 飞书配置 -->
+        <div class="platform-config" id="larkConfig" {{if not .Config.LarkEnabled}}style="display:none"{{end}}>
+            <h3>飞书配置</h3>
+
+            <div class="form-group">
+                <label for="larkAppID">App ID <span class="required">*</span></label>
+                <input type="text" id="larkAppID" name="larkAppID" placeholder="cli_xxxxxxxxxxxxxxxx" value="{{.Config.LarkAppID}}">
+                <span class="error-message" id="larkAppIDError"></span>
+            </div>
+
+            <div class="form-group">
+                <label for="larkAppSecret">App Secret <span class="required">*</span></label>
+                <input type="password" id="larkAppSecret" name="larkAppSecret" placeholder="输入 App Secret" value="{{.Config.LarkAppSecret}}">
+                <span class="error-message" id="larkAppSecretError"></span>
+            </div>
+
+            <div class="form-group">
+                <label for="larkEncryptKey">Encrypt Key</label>
+                <input type="text" id="larkEncryptKey" name="larkEncryptKey" placeholder="可选，用于消息加解密" value="{{.Config.LarkEncryptKey}}">
+                <span class="error-message" id="larkEncryptKeyError"></span>
+            </div>
+
+            <div class="form-group">
+                <label for="larkVerificationToken">Verification Token</label>
+                <input type="text" id="larkVerificationToken" name="larkVerificationToken" placeholder="可选，用于事件回调验证" value="{{.Config.LarkVerificationToken}}">
+                <span class="error-message" id="larkVerificationTokenError"></span>
+            </div>
+        </div>
+
+        <div class="platform-error" id="platformError">
+            请至少启用并配置一个平台
+        </div>
+
+        <div class="form-actions">
+            <a href="/setup/basic" class="btn btn-secondary">返回</a>
+            <button type="submit" class="btn btn-primary">下一步</button>
+        </div>
+    </form>
+</div>
+{{end}}

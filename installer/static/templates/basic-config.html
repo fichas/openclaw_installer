@@ -1,0 +1,73 @@
+{{define "content"}}
+<div class="card">
+    <h2>基础配置</h2>
+    <p class="description">配置 AI 模型和服务器端口</p>
+
+    <form id="basicConfigForm" class="config-form" data-next="/setup/platform">
+        <div class="form-section">
+            <h3>AI 模型配置</h3>
+
+            <div class="form-group">
+                <label for="aiProvider">AI 提供商 <span class="required">*</span></label>
+                <select id="aiProvider" name="aiProvider" required>
+                    <option value="">请选择 AI 提供商</option>
+                    <option value="openai" {{if eq .Config.AIProvider "openai"}}selected{{end}}>OpenAI</option>
+                    <option value="azure" {{if eq .Config.AIProvider "azure"}}selected{{end}}>Azure OpenAI</option>
+                    <option value="claude" {{if eq .Config.AIProvider "claude"}}selected{{end}}>Claude (Anthropic)</option>
+                    <option value="deepseek" {{if eq .Config.AIProvider "deepseek"}}selected{{end}}>DeepSeek</option>
+                    <option value="qwen" {{if eq .Config.AIProvider "qwen"}}selected{{end}}>通义千问</option>
+                </select>
+                <span class="error-message" id="aiProviderError"></span>
+            </div>
+
+            <div class="form-group">
+                <label for="aiModel">模型名称 <span class="required">*</span></label>
+                <input type="text" id="aiModel" name="aiModel" placeholder="例如：gpt-4o" value="{{.Config.AIModel}}" required>
+                <span class="help-text">常用模型：gpt-4o, gpt-4o-mini, claude-3-sonnet, deepseek-chat</span>
+                <span class="error-message" id="aiModelError"></span>
+            </div>
+
+            <div class="form-group">
+                <label for="aiApiKey">API Key <span class="required">*</span></label>
+                <input type="password" id="aiApiKey" name="aiApiKey" placeholder="输入您的 API Key" value="{{.Config.AIAPIKey}}" required>
+                <span class="help-text">您的 API Key 将被安全加密存储</span>
+                <span class="error-message" id="aiApiKeyError"></span>
+            </div>
+
+            <div class="form-group">
+                <label for="aiBaseUrl">API 基础 URL</label>
+                <input type="url" id="aiBaseUrl" name="aiBaseUrl" placeholder="https://api.openai.com/v1" value="{{.Config.AIBaseURL}}">
+                <span class="help-text">可选，使用第三方代理或 Azure 时需要填写</span>
+                <span class="error-message" id="aiBaseUrlError"></span>
+            </div>
+        </div>
+
+        <div class="form-section">
+            <h3>服务器配置</h3>
+
+            <div class="form-group">
+                <label for="serverPort">服务端口 <span class="required">*</span></label>
+                <input type="number" id="serverPort" name="serverPort" placeholder="8080" value="{{.Config.ServerPort}}" min="1" max="65535" required>
+                <span class="help-text">OpenClaw 服务监听的端口（1-65535）</span>
+                <span class="error-message" id="serverPortError"></span>
+            </div>
+
+            <div class="form-group">
+                <label for="logLevel">日志级别</label>
+                <select id="logLevel" name="logLevel">
+                    <option value="debug" {{if eq .Config.LogLevel "debug"}}selected{{end}}>Debug</option>
+                    <option value="info" {{if eq .Config.LogLevel "info"}}selected{{end}}>Info</option>
+                    <option value="warn" {{if eq .Config.LogLevel "warn"}}selected{{end}}>Warning</option>
+                    <option value="error" {{if eq .Config.LogLevel "error"}}selected{{end}}>Error</option>
+                </select>
+                <span class="error-message" id="logLevelError"></span>
+            </div>
+        </div>
+
+        <div class="form-actions">
+            <a href="/setup" class="btn btn-secondary">返回</a>
+            <button type="submit" class="btn btn-primary">下一步</button>
+        </div>
+    </form>
+</div>
+{{end}}

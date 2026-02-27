@@ -1,0 +1,49 @@
+# Binaries
+*.exe
+*.dll
+*.so
+*.dylib
+openclaw-installer
+openclaw-updater
+
+# Build directories
+dist/
+build/
+release/
+usb-deploy/
+
+# Test coverage
+coverage.out
+coverage.html
+*.test
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+logs/
+
+# Temp
+tmp/
+temp/
+*.tmp
+
+# Config (user-specific)
+openclaw.json
+config.yaml
+
+# Dependencies (vendor if needed)
+vendor/
+
+# Go workspace
+go.work
+go.work.sum
