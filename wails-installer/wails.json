@@ -1,0 +1,31 @@
+{
+  "$schema": "https://wails.io/schemas/config.v2.json",
+  "name": "openclaw-installer",
+  "outputfilename": "OpenClaw-Installer",
+  "frontend": {
+    "dir": "./frontend/dist",
+    "install": "echo 'No build required for static HTML'",
+    "build": "echo 'No build required for static HTML'",
+    "package": "echo 'No build required for static HTML'",
+    "wailsjsdir": "./frontend/src"
+  },
+  "author": {
+    "name": "OpenClaw Team",
+    "email": "team@openclaw.org"
+  },
+  "info": {
+    "companyName": "OpenClaw",
+    "productName": "OpenClaw Installer",
+    "productVersion": "1.0.0",
+    "copyright": "Copyright © 2026 OpenClaw",
+    "comments": "Cross-platform AI assistant installer"
+  },
+  "nsisType": "multiple",
+  "obfuscated": false,
+  "garbleargs": "",
+  "bindings": {
+    "ts_generation": {
+      "outputType": "classes"
+    }
+  }
+}

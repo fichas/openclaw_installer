@@ -16,6 +16,18 @@ const (
 )
 
 func main() {
+	// Setup logging to file (required for Windows GUI mode)
+	logFile, err := setupLogging()
+	if err != nil {
+		// Fallback to console logging if file logging fails
+		log.Printf("Warning: Failed to setup file logging: %v", err)
+	} else {
+		defer logFile.Close()
+	}
+
+	// Clean up old log files
+	cleanupOldLogs()
+
 	log.Println("OpenClaw Installer Starting...")
 
 	// Detect platform

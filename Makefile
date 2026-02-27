@@ -43,6 +43,7 @@ help:
 	@echo "  make build-all       - Build all platform binaries"
 	@echo "  make build-darwin    - Build macOS binaries (amd64, arm64)"
 	@echo "  make build-windows   - Build Windows binaries (amd64, arm64)"
+	@echo "  make build-windows-gui - Build Windows GUI binaries (no console)"
 	@echo "  make build-linux     - Build Linux binaries (amd64, arm64)"
 	@echo "  make package         - Create distribution packages"
 	@echo "  make usb-deploy      - Create U盘 deployment structure"
@@ -117,6 +118,21 @@ build-windows: $(DIST_DIR)
 		$(GO) build $(LDFLAGS) $(GCFLAGS) $(ASMFLAGS) \
 		-o ../$(DIST_DIR)/$(PROJECT_NAME)-windows-arm64.exe .
 	@echo "Windows builds complete!"
+
+# Windows GUI builds (no console window)
+.PHONY: build-windows-gui
+build-windows-gui: $(DIST_DIR)
+	@echo "Building Windows GUI binaries (no console window)..."
+	@echo "  -> Building windows-amd64-gui..."
+	@cd $(INSTALLER_DIR) && GOOS=windows GOARCH=amd64 CGO_ENABLED=0 \
+		$(GO) build -ldflags "-X main.Version=$(VERSION) -X main.BuildTime=$(BUILD_TIME) -X main.GitCommit=$(GIT_COMMIT) -s -w -H=windowsgui" $(GCFLAGS) $(ASMFLAGS) \
+		-o ../$(DIST_DIR)/$(PROJECT_NAME)-windows-amd64-gui.exe .
+	@echo "  -> Building windows-arm64-gui..."
+	@cd $(INSTALLER_DIR) && GOOS=windows GOARCH=arm64 CGO_ENABLED=0 \
+		$(GO) build -ldflags "-X main.Version=$(VERSION) -X main.BuildTime=$(BUILD_TIME) -X main.GitCommit=$(GIT_COMMIT) -s -w -H=windowsgui" $(GCFLAGS) $(ASMFLAGS) \
+		-o ../$(DIST_DIR)/$(PROJECT_NAME)-windows-arm64-gui.exe .
+	@echo "Windows GUI builds complete!"
+	@echo "Note: GUI binaries log to %LOCALAPPDATA%\OpenClaw\Logs\"
 
 # Linux builds
 .PHONY: build-linux
