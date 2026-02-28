@@ -1,0 +1,19 @@
+{
+  "name": "openclaw",
+  "private": true,
+  "version": "2.0.0",
+  "description": "OpenClaw AI 助手安装器与配置管理系统",
+  "scripts": {
+    "dev:installer": "pnpm --filter @openclaw/installer dev",
+    "dev:config": "pnpm --filter @openclaw/config-server dev",
+    "build:installer": "pnpm --filter @openclaw/installer build",
+    "build:config": "pnpm --filter @openclaw/config-server build",
+    "build": "pnpm -r build",
+    "lint": "pnpm -r lint",
+    "test": "pnpm -r test"
+  },
+  "engines": {
+    "node": ">=20.0.0",
+    "pnpm": ">=9.0.0"
+  }
+}
