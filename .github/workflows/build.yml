@@ -92,10 +92,11 @@ jobs:
           name: OpenClaw-Installer-Windows-x64
           path: dist/OpenClaw-Installer-Windows-x64.exe
 
-  # 构建 Wails GUI 安装器 (macOS)
+  # 构建 Wails GUI 安装器 (macOS) - 可选
   build-wails-macos:
     needs: test
     runs-on: macos-latest
+    continue-on-error: true
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-go@v5
@@ -122,10 +123,11 @@ jobs:
           name: OpenClaw-Installer-macOS
           path: wails-installer/build/bin/*
 
-  # 构建 Wails GUI 安装器 (Linux)
+  # 构建 Wails GUI 安装器 (Linux) - 可选
   build-wails-linux:
     needs: test
     runs-on: ubuntu-latest
+    continue-on-error: true
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-go@v5
@@ -134,7 +136,12 @@ jobs:
       - name: Install system dependencies
         run: |
           sudo apt-get update
-          sudo apt-get install -y libgtk-3-dev libwebkit2gtk-4.0-dev
+          sudo apt-get install -y --no-install-recommends \
+            libgtk-3-dev \
+            libwebkit2gtk-4.0-dev \
+            gcc \
+            pkg-config \
+            libgirepository1.0-dev
       - name: Install Wails
         run: go install github.com/wailsapp/wails/v2/cmd/wails@latest
       - name: Build Wails GUI (Linux AMD64)
