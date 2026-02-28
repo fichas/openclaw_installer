@@ -1,12 +1,12 @@
-name: Build and Release
+name: Build & Release
 
 on:
   push:
     branches: [main, master]
+    tags: ['v*']
   pull_request:
     branches: [main, master]
 
-# 添加权限配置
 permissions:
   contents: write
   actions: read
@@ -16,146 +16,85 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: actions/setup-go@v5
+      - uses: pnpm/action-setup@v4
         with:
-          go-version: '1.22'
-      - name: Run tests
-        run: |
-          cd installer
-          go test -v -race ./...
+          version: 9
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'pnpm'
+      - run: pnpm install
+      - run: pnpm test
 
-  # 构建命令行安装器 (所有平台)
-  build:
+  build-installer:
     needs: test
-    runs-on: ubuntu-latest
     strategy:
       matrix:
         include:
-          - goos: linux
-            goarch: amd64
-          - goos: linux
-            goarch: arm64
-          - goos: darwin
-            goarch: amd64
-          - goos: darwin
-            goarch: arm64
-          - goos: windows
-            goarch: amd64
-          - goos: windows
-            goarch: arm64
+          - os: ubuntu-latest
+            targets: 'linux'
+          - os: macos-latest
+            targets: 'mac'
+          - os: windows-latest
+            targets: 'win'
+    runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v4
-      - uses: actions/setup-go@v5
+      - uses: pnpm/action-setup@v4
         with:
-          go-version: '1.22'
-      - name: Build
+          version: 9
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'pnpm'
+      - run: pnpm install
+      - run: pnpm build:installer
         env:
-          GOOS: ${{ matrix.goos }}
-          GOARCH: ${{ matrix.goarch }}
-        run: |
-          cd installer
-          output_name="openclaw-installer-${{ matrix.goos }}-${{ matrix.goarch }}"
-          if [ "${{ matrix.goos }}" = "windows" ]; then
-            output_name="${output_name}.exe"
-          fi
-          VERSION="${GITHUB_SHA::7}"
-          go build -ldflags "-s -w -X main.Version=$VERSION" -o "../dist/${output_name}"
-      - name: Upload
-        uses: actions/upload-artifact@v4
+          ELECTRON_MIRROR: https://npmmirror.com/mirrors/electron/
+          ELECTRON_BUILDER_BINARIES_MIRROR: https://npmmirror.com/mirrors/electron-builder-binaries/
+      - uses: actions/upload-artifact@v4
         with:
-          name: installer-${{ matrix.goos }}-${{ matrix.goarch }}
-          path: dist/openclaw-installer-*
+          name: installer-${{ matrix.targets }}
+          path: packages/installer/dist-electron/*
 
-  # 打包发布
-  package:
-    needs: build
+  build-config-server:
+    needs: test
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Download artifacts
-        uses: actions/download-artifact@v4
+      - uses: pnpm/action-setup@v4
         with:
-          path: artifacts
-          pattern: installer-*
-      - name: Create package
-        run: |
-          mkdir -p package/OpenClaw/{windows,macos,linux,shared}
-
-          # Windows
-          cp artifacts/installer-windows-amd64/openclaw-installer-windows-amd64.exe package/OpenClaw/windows/OpenClaw-Installer.exe
-          cp artifacts/installer-windows-arm64/openclaw-installer-windows-arm64.exe package/OpenClaw/windows/ 2>/dev/null || true
-          cp usb-template/install.bat package/OpenClaw/windows/
-          cp usb-template/install.ps1 package/OpenClaw/windows/
-
-          # macOS
-          cp artifacts/installer-darwin-amd64/openclaw-installer-darwin-amd64 package/OpenClaw/macos/OpenClaw-Installer
-          cp artifacts/installer-darwin-arm64/openclaw-installer-darwin-arm64 package/OpenClaw/macos/ 2>/dev/null || true
-          cp usb-template/install-mac.command package/OpenClaw/macos/
-
-          # Linux
-          cp artifacts/installer-linux-amd64/openclaw-installer-linux-amd64 package/OpenClaw/linux/OpenClaw-Installer
-          cp artifacts/installer-linux-arm64/openclaw-installer-linux-arm64 package/OpenClaw/linux/ 2>/dev/null || true
-          cp usb-template/install-linux.sh package/OpenClaw/linux/
-
-          # Shared
-          cp -r adapters package/OpenClaw/shared/
-          cp usb-template/README.txt package/OpenClaw/
-          echo "${GITHUB_SHA::7}" > package/OpenClaw/VERSION.txt
-
-          # Create ZIP
-          cd package
-          zip -r ../OpenClaw-Package.zip OpenClaw/
-      - name: Upload package
-        uses: actions/upload-artifact@v4
+          version: 9
+      - uses: actions/setup-node@v4
         with:
-          name: OpenClaw-Complete-Package
-          path: OpenClaw-Package.zip
+          node-version: 20
+          cache: 'pnpm'
+      - run: pnpm install
+      - run: pnpm build:config
+      - uses: actions/upload-artifact@v4
+        with:
+          name: config-server
+          path: packages/config-server/.output/
 
-  # 创建 Release (在 master 分支推送或有 tag 时)
   release:
-    needs: [build, package]
+    if: startsWith(github.ref, 'refs/tags/v') || github.ref == 'refs/heads/master'
+    needs: [build-installer, build-config-server]
     runs-on: ubuntu-latest
-    if: github.ref == 'refs/heads/master' || startsWith(github.ref, 'refs/tags/v')
     steps:
       - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
         with:
-          fetch-depth: 0
-
-      - name: Download all artifacts
-        uses: actions/download-artifact@v4
-        with:
-          path: artifacts
-          pattern: '*'
-
-      # 在 master 分支推送时，创建/更新 nightly tag
-      - name: Create Nightly Tag
+          path: artifacts/
+      - name: Create nightly tag
         if: github.ref == 'refs/heads/master'
         run: |
-          git config user.name "GitHub Actions"
-          git config user.email "actions@github.com"
           git tag -f nightly
           git push -f origin nightly
-
-      - name: Create Release (Tag)
-        if: startsWith(github.ref, 'refs/tags/v')
-        uses: softprops/action-gh-release@v1
+      - name: Create Release
+        uses: softprops/action-gh-release@v2
         with:
-          files: |
-            artifacts/installer-*/openclaw-installer-*
-            artifacts/OpenClaw-Complete-Package/OpenClaw-Package.zip
+          tag_name: ${{ startsWith(github.ref, 'refs/tags/') && github.ref_name || 'nightly' }}
+          name: ${{ startsWith(github.ref, 'refs/tags/') && github.ref_name || 'Nightly Build' }}
+          prerelease: ${{ github.ref == 'refs/heads/master' }}
           generate_release_notes: true
-
-      - name: Create Release (Nightly)
-        if: github.ref == 'refs/heads/master'
-        uses: softprops/action-gh-release@v1
-        with:
-          tag_name: nightly
-          name: Nightly Build
-          body: |
-            自动构建的最新版本
-            构建时间: ${{ github.event.head_commit.timestamp }}
-            提交: ${{ github.sha }}
-          files: |
-            artifacts/installer-*/openclaw-installer-*
-            artifacts/OpenClaw-Complete-Package/OpenClaw-Package.zip
-          prerelease: true
+          files: artifacts/**/*
