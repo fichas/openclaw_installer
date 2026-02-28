@@ -1,0 +1,12 @@
+{
+  "name": "@openclaw/shared",
+  "version": "2.0.0",
+  "private": true,
+  "main": "./index.ts",
+  "types": "./index.ts",
+  "exports": {
+    ".": "./index.ts",
+    "./types": "./types/index.ts",
+    "./utils": "./utils/index.ts"
+  }
+}

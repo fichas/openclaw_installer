@@ -55,3 +55,16 @@ vendor/
 # Go workspace
 go.work
 go.work.sum
+
+# Node.js
+node_modules/
+.output/
+.nuxt/
+.pnpm-store/
+
+# Electron
+dist-electron/
+
+# Environment
+.env
+.env.local
