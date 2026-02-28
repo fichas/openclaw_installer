@@ -3,6 +3,7 @@ package updater
 import (
 	"os"
 	"path/filepath"
+	"strings"
 	"testing"
 	"time"
 
@@ -157,7 +158,9 @@ func TestWindowsUpdaterGetComponentPath(t *testing.T) {
 
 	for _, tt := range tests {
 		result := updater.getComponentPath(tt.component)
-		if result != tt.expected {
+		normalizedResult := strings.ReplaceAll(result, "\\", "/")
+		normalizedExpected := strings.ReplaceAll(tt.expected, "\\", "/")
+		if normalizedResult != normalizedExpected {
 			t.Errorf("getComponentPath(%s) = %s, want %s", tt.component, result, tt.expected)
 		}
 	}

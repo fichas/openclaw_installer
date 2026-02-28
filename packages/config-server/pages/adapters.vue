@@ -2,145 +2,62 @@
   <div class="adapters-page">
     <n-card title="IM 适配器配置">
       <n-tabs v-model:value="activeTab" type="line">
-        <!-- 企业微信 -->
         <n-tab-pane name="wechat-work" tab="企业微信">
-          <n-form
-            label-placement="left"
-            label-width="120"
-            style="max-width: 500px; margin-top: 16px;"
-          >
+          <n-form label-placement="left" label-width="120" style="max-width: 500px; margin-top: 16px;">
             <n-form-item label="启用">
               <n-switch v-model:value="adapters.wechatWork.enabled" />
             </n-form-item>
             <n-form-item label="企业ID">
-              <n-input
-                v-model:value="adapters.wechatWork.config.corp_id"
-                placeholder="请输入企业微信的企业ID"
-              />
-              <template #feedback>
-                在企业微信管理后台 "我的企业" 页面获取
-              </template>
+              <n-input v-model:value="adapters.wechatWork.options.corp_id" placeholder="请输入企业微信的企业ID" />
             </n-form-item>
             <n-form-item label="应用密钥">
-              <n-input
-                v-model:value="adapters.wechatWork.config.corp_secret"
-                type="password"
-                show-password-on="click"
-                placeholder="请输入应用的 Secret"
-              />
-              <template #feedback>
-                在企业微信管理后台 "应用管理" 中对应应用详情页获取
-              </template>
+              <n-input v-model:value="adapters.wechatWork.options.corp_secret" type="password" show-password-on="click" placeholder="请输入应用的 Secret" />
             </n-form-item>
             <n-form-item label="AgentID">
-              <n-input
-                v-model:value="adapters.wechatWork.config.agent_id"
-                placeholder="请输入应用的 AgentID"
-              />
-              <template #feedback>
-                在企业微信管理后台 "应用管理" 中对应应用详情页获取
-              </template>
+              <n-input v-model:value="adapters.wechatWork.options.agent_id" placeholder="请输入应用的 AgentID" />
             </n-form-item>
             <n-form-item label="">
-              <n-button type="primary" :loading="saving === 'wechat-work'" @click="saveAdapter('wechat-work')">
-                保存
-              </n-button>
+              <n-button type="primary" :loading="saving === 'wechat-work'" @click="saveAdapter('wechat-work')">保存</n-button>
             </n-form-item>
           </n-form>
         </n-tab-pane>
 
-        <!-- 钉钉 -->
         <n-tab-pane name="dingtalk" tab="钉钉">
-          <n-form
-            label-placement="left"
-            label-width="120"
-            style="max-width: 500px; margin-top: 16px;"
-          >
+          <n-form label-placement="left" label-width="120" style="max-width: 500px; margin-top: 16px;">
             <n-form-item label="启用">
               <n-switch v-model:value="adapters.dingtalk.enabled" />
             </n-form-item>
             <n-form-item label="AppKey">
-              <n-input
-                v-model:value="adapters.dingtalk.config.app_key"
-                placeholder="请输入钉钉应用的 AppKey"
-              />
-              <template #feedback>
-                在钉钉开放平台 "应用开发" 中获取
-              </template>
+              <n-input v-model:value="adapters.dingtalk.options.app_key" placeholder="请输入钉钉应用的 AppKey" />
             </n-form-item>
             <n-form-item label="AppSecret">
-              <n-input
-                v-model:value="adapters.dingtalk.config.app_secret"
-                type="password"
-                show-password-on="click"
-                placeholder="请输入钉钉应用的 AppSecret"
-              />
-              <template #feedback>
-                在钉钉开放平台 "应用开发" 中获取
-              </template>
+              <n-input v-model:value="adapters.dingtalk.options.app_secret" type="password" show-password-on="click" placeholder="请输入钉钉应用的 AppSecret" />
             </n-form-item>
             <n-form-item label="机器人编码">
-              <n-input
-                v-model:value="adapters.dingtalk.config.robot_code"
-                placeholder="可选，请输入机器人编码"
-              />
-              <template #feedback>
-                在钉钉开放平台 "机器人" 配置中获取（可选）
-              </template>
+              <n-input v-model:value="adapters.dingtalk.options.robot_code" placeholder="可选，请输入机器人编码" />
             </n-form-item>
             <n-form-item label="">
-              <n-button type="primary" :loading="saving === 'dingtalk'" @click="saveAdapter('dingtalk')">
-                保存
-              </n-button>
+              <n-button type="primary" :loading="saving === 'dingtalk'" @click="saveAdapter('dingtalk')">保存</n-button>
             </n-form-item>
           </n-form>
         </n-tab-pane>
 
-        <!-- 飞书 -->
         <n-tab-pane name="feishu" tab="飞书">
-          <n-form
-            label-placement="left"
-            label-width="120"
-            style="max-width: 500px; margin-top: 16px;"
-          >
+          <n-form label-placement="left" label-width="120" style="max-width: 500px; margin-top: 16px;">
             <n-form-item label="启用">
               <n-switch v-model:value="adapters.feishu.enabled" />
             </n-form-item>
             <n-form-item label="App ID">
-              <n-input
-                v-model:value="adapters.feishu.config.app_id"
-                placeholder="请输入飞书应用的 App ID"
-              />
-              <template #feedback>
-                在飞书开放平台 "凭证与基础信息" 中获取
-              </template>
+              <n-input v-model:value="adapters.feishu.options.app_id" placeholder="请输入飞书应用的 App ID" />
             </n-form-item>
             <n-form-item label="App Secret">
-              <n-input
-                v-model:value="adapters.feishu.config.app_secret"
-                type="password"
-                show-password-on="click"
-                placeholder="请输入飞书应用的 App Secret"
-              />
-              <template #feedback>
-                在飞书开放平台 "凭证与基础信息" 中获取
-              </template>
+              <n-input v-model:value="adapters.feishu.options.app_secret" type="password" show-password-on="click" placeholder="请输入飞书应用的 App Secret" />
             </n-form-item>
             <n-form-item label="加密密钥">
-              <n-input
-                v-model:value="adapters.feishu.config.encrypt_key"
-                type="password"
-                show-password-on="click"
-                placeholder="可选，请输入事件加密密钥"
-              />
-              <template #feedback>
-                在飞书开放平台 "事件订阅" 中获取（可选）
-              </template>
+              <n-input v-model:value="adapters.feishu.options.encrypt_key" type="password" show-password-on="click" placeholder="可选，请输入事件加密密钥" />
             </n-form-item>
             <n-form-item label="">
-              <n-button type="primary" :loading="saving === 'feishu'" @click="saveAdapter('feishu')">
-                保存
-              </n-button>
+              <n-button type="primary" :loading="saving === 'feishu'" @click="saveAdapter('feishu')">保存</n-button>
             </n-form-item>
           </n-form>
         </n-tab-pane>
@@ -162,15 +79,21 @@ import {
   NButton,
   useMessage,
 } from 'naive-ui'
+import type { OpenClawConfig, AdapterConfig, ApiKeyConfig } from '@openclaw/shared'
 
 const message = useMessage()
 const activeTab = ref('wechat-work')
 const saving = ref<string | null>(null)
 
-const adapters = reactive({
+type EditableAdapter = {
+  enabled: boolean
+  options: Record<string, string>
+}
+
+const adapters = reactive<Record<'wechatWork' | 'dingtalk' | 'feishu', EditableAdapter>>({
   wechatWork: {
     enabled: false,
-    config: {
+    options: {
       corp_id: '',
       corp_secret: '',
       agent_id: '',
@@ -178,7 +101,7 @@ const adapters = reactive({
   },
   dingtalk: {
     enabled: false,
-    config: {
+    options: {
       app_key: '',
       app_secret: '',
       robot_code: '',
@@ -186,7 +109,7 @@ const adapters = reactive({
   },
   feishu: {
     enabled: false,
-    config: {
+    options: {
       app_id: '',
       app_secret: '',
       encrypt_key: '',
@@ -194,8 +117,7 @@ const adapters = reactive({
   },
 })
 
-// 适配器名称映射
-const adapterKeyMap: Record<string, keyof typeof adapters> = {
+const adapterKeyMap: Record<string, 'wechatWork' | 'dingtalk' | 'feishu'> = {
   'wechat-work': 'wechatWork',
   dingtalk: 'dingtalk',
   feishu: 'feishu',
@@ -207,6 +129,73 @@ const displayNameMap: Record<string, string> = {
   feishu: '飞书',
 }
 
+function detectClientPlatform(): string {
+  const ua = navigator.userAgent.toLowerCase()
+  if (ua.includes('windows')) return 'windows'
+  if (ua.includes('mac')) return 'darwin'
+  return 'linux'
+}
+
+function normalizeAdapters(raw: any): AdapterConfig[] {
+  if (Array.isArray(raw)) {
+    return raw.map((item) => ({
+      name: item?.name || '',
+      type: item?.type || 'messaging',
+      displayName: item?.displayName || item?.name || '',
+      enabled: Boolean(item?.enabled),
+      options: { ...(item?.options || item?.config || {}) },
+    })).filter((item) => item.name)
+  }
+
+  if (raw && typeof raw === 'object') {
+    return Object.entries(raw).map(([name, value]: [string, any]) => ({
+      name,
+      type: value?.type || 'messaging',
+      displayName: value?.displayName || name,
+      enabled: Boolean(value?.enabled),
+      options: { ...(value?.options || value?.config || {}) },
+    }))
+  }
+
+  return []
+}
+
+function normalizeApiKeys(raw: any): ApiKeyConfig[] {
+  if (!Array.isArray(raw)) return []
+  return raw
+    .map((item: any): ApiKeyConfig | null => {
+      const id = item?.id || ''
+      const name = item?.name || ''
+      const provider = item?.provider || ''
+      const key = item?.key || item?.apiKey || ''
+      if (!id || !name || !provider || !key) return null
+      return {
+        id,
+        name,
+        provider,
+        key,
+        endpoint: item?.endpoint || undefined,
+        createdAt: item?.createdAt || new Date().toISOString(),
+      }
+    })
+    .filter((item): item is ApiKeyConfig => item !== null)
+}
+
+function normalizeConfig(raw: any): OpenClawConfig {
+  return {
+    version: raw?.version || '2.0.0',
+    platform: raw?.platform || detectClientPlatform(),
+    server: {
+      host: raw?.server?.host || '0.0.0.0',
+      port: Number(raw?.server?.port) || 18080,
+      tls: Boolean(raw?.server?.tls),
+    },
+    adapters: normalizeAdapters(raw?.adapters),
+    apiKeys: normalizeApiKeys(raw?.apiKeys),
+    settings: raw?.settings && typeof raw.settings === 'object' ? raw.settings : {},
+  }
+}
+
 onMounted(() => {
   fetchConfig()
 })
@@ -214,18 +203,15 @@ onMounted(() => {
 async function fetchConfig() {
   try {
     const res = await $fetch<{ success: boolean; data?: any }>('/api/config')
-    if (res.success && res.data && res.data.adapters) {
-      const savedAdapters = res.data.adapters
+    const config = normalizeConfig(res.success ? res.data : null)
 
-      for (const [adapterName, reactiveKey] of Object.entries(adapterKeyMap)) {
-        if (savedAdapters[adapterName]) {
-          const saved = savedAdapters[adapterName]
-          const target = adapters[reactiveKey]
-          target.enabled = saved.enabled || false
-          if (saved.config) {
-            Object.assign(target.config, saved.config)
-          }
-        }
+    for (const adapter of config.adapters) {
+      const reactiveKey = adapterKeyMap[adapter.name]
+      if (!reactiveKey) continue
+      adapters[reactiveKey].enabled = Boolean(adapter.enabled)
+      adapters[reactiveKey].options = {
+        ...adapters[reactiveKey].options,
+        ...adapter.options,
       }
     }
   } catch (err: any) {
@@ -233,26 +219,49 @@ async function fetchConfig() {
   }
 }
 
+function buildAdapterArray(): AdapterConfig[] {
+  return [
+    {
+      name: 'wechat-work',
+      type: 'messaging',
+      displayName: '企业微信',
+      enabled: adapters.wechatWork.enabled,
+      options: { ...adapters.wechatWork.options },
+    },
+    {
+      name: 'dingtalk',
+      type: 'messaging',
+      displayName: '钉钉',
+      enabled: adapters.dingtalk.enabled,
+      options: { ...adapters.dingtalk.options },
+    },
+    {
+      name: 'feishu',
+      type: 'messaging',
+      displayName: '飞书',
+      enabled: adapters.feishu.enabled,
+      options: { ...adapters.feishu.options },
+    },
+  ]
+}
+
 async function saveAdapter(adapterName: string) {
   saving.value = adapterName
   try {
-    // 先读取当前配置
     const res = await $fetch<{ success: boolean; data?: any }>('/api/config')
-    const config = res.success && res.data ? res.data : { version: '2.0.0', apiKeys: [], adapters: {} }
-
-    if (!config.adapters) {
-      config.adapters = {}
+    const config = normalizeConfig(res.success ? res.data : null)
+    const merged = new Map<string, AdapterConfig>()
+    for (const adapter of config.adapters) {
+      merged.set(adapter.name, adapter)
     }
 
-    const reactiveKey = adapterKeyMap[adapterName]
-    const adapterData = adapters[reactiveKey]
-
-    config.adapters[adapterName] = {
-      name: adapterName,
-      displayName: displayNameMap[adapterName],
-      enabled: adapterData.enabled,
-      config: { ...adapterData.config },
+    const currentAdapters = buildAdapterArray()
+    const updated = currentAdapters.find((item) => item.name === adapterName)
+    if (updated) {
+      merged.set(adapterName, updated)
     }
+
+    config.adapters = Array.from(merged.values())
 
     await $fetch('/api/config', {
       method: 'POST',

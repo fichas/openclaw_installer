@@ -17,12 +17,15 @@
           <span class="mode-label">自定义安装</span>
         </n-radio>
         <p class="mode-detail">选择自定义的安装目录。</p>
-        <n-input
-          v-if="installOptions.mode === 'custom'"
-          v-model:value="installOptions.installDir"
-          placeholder="请输入安装目录路径"
-          class="custom-dir-input"
-        />
+        <div v-if="installOptions.mode === 'custom'" class="custom-row">
+          <n-input
+            v-model:value="installOptions.installDir"
+            placeholder="请选择安装目录路径"
+            class="custom-dir-input"
+            readonly
+          />
+          <n-button @click="pickDir">选择目录</n-button>
+        </div>
       </div>
     </n-radio-group>
 
@@ -34,32 +37,46 @@
 </template>
 
 <script setup lang="ts">
-import { onMounted } from 'vue'
-import { NRadioGroup, NRadio, NButton, NInput } from 'naive-ui'
+import { onMounted, ref } from 'vue'
+import { NRadioGroup, NRadio, NButton, NInput, useMessage } from 'naive-ui'
 import { useWizard } from '~/composables/useWizard'
 
 const { installOptions, goNext, goBack } = useWizard()
+const message = useMessage()
 
 const defaultInstallDir = ref('')
 
-onMounted(() => {
+onMounted(async () => {
   try {
-    const { getPlatformPaths } = require('@openclaw/shared')
-    const paths = getPlatformPaths()
-    defaultInstallDir.value = paths.installDir
-    if (installOptions.value.installDir === '') {
-      installOptions.value.installDir = paths.installDir
-      installOptions.value.configDir = paths.configDir
+    if (window.electronAPI?.getPlatformPaths) {
+      const paths = await window.electronAPI.getPlatformPaths()
+      defaultInstallDir.value = paths.installDir
+      if (installOptions.value.installDir === '') {
+        installOptions.value.installDir = paths.installDir
+        installOptions.value.configDir = paths.configDir
+      }
+      return
     }
   } catch {
-    // Fallback for browser environment during dev
-    defaultInstallDir.value = '/usr/local/bin'
-    if (installOptions.value.installDir === '') {
-      installOptions.value.installDir = '/usr/local/bin'
-      installOptions.value.configDir = '~/.config/openclaw'
-    }
+    message.warning('获取系统默认目录失败，已使用默认值')
+  }
+
+  defaultInstallDir.value = '/usr/local/bin'
+  if (installOptions.value.installDir === '') {
+    installOptions.value.installDir = '/usr/local/bin'
+    installOptions.value.configDir = '~/.config/openclaw'
   }
 })
+
+async function pickDir() {
+  if (!window.electronAPI?.selectDirectory) {
+    return
+  }
+  const selected = await window.electronAPI.selectDirectory()
+  if (selected) {
+    installOptions.value.installDir = selected
+  }
+}
 
 function handleNext() {
   if (installOptions.value.mode === 'standard') {
@@ -134,9 +151,15 @@ function handleNext() {
   font-family: monospace;
 }
 
-.custom-dir-input {
+.custom-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
   margin: 10px 0 0 26px;
-  width: calc(100% - 26px);
+}
+
+.custom-dir-input {
+  flex: 1;
 }
 
 .nav-buttons {

@@ -1,24 +1,53 @@
 import { contextBridge, ipcRenderer, shell } from 'electron'
 
-// 暴露给渲染进程的安全 API
+type InstallProgress = {
+  step: number
+  totalSteps: number
+  message: string
+  percent: number
+  error?: string
+}
+
+type InstallOptions = {
+  installDir: string
+  configDir: string
+  sourceDir: string
+  adapters: string[]
+  mode: 'standard' | 'custom'
+}
+
+type PlatformPaths = {
+  installDir: string
+  configDir: string
+  configFile: string
+  logDir: string
+}
+
 contextBridge.exposeInMainWorld('electronAPI', {
-  // 应用控制
   quitApp: () => ipcRenderer.send('app-quit'),
-
-  // 打开外部链接
   openExternal: (url: string) => shell.openExternal(url),
-
-  // 平台信息
   platform: process.platform,
+  getPlatformPaths: (): Promise<PlatformPaths> => ipcRenderer.invoke('get-platform-paths'),
+  selectDirectory: (): Promise<string | null> => ipcRenderer.invoke('select-directory'),
+  startInstall: (payload: InstallOptions): Promise<{ success: boolean; error?: string }> =>
+    ipcRenderer.invoke('install-start', payload),
+  onInstallProgress: (callback: (progress: InstallProgress) => void) => {
+    const handler = (_event: unknown, data: InstallProgress) => callback(data)
+    ipcRenderer.on('install-progress', handler)
+    return () => ipcRenderer.removeListener('install-progress', handler)
+  },
 })
 
-// 类型声明，供渲染进程使用
 declare global {
   interface Window {
     electronAPI: {
       quitApp: () => void
       openExternal: (url: string) => void
       platform: string
+      getPlatformPaths: () => Promise<PlatformPaths>
+      selectDirectory: () => Promise<string | null>
+      startInstall: (payload: InstallOptions) => Promise<{ success: boolean; error?: string }>
+      onInstallProgress: (callback: (progress: InstallProgress) => void) => () => void
     }
   }
 }

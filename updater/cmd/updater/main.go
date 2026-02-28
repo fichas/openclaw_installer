@@ -8,6 +8,7 @@ import (
 	"os"
 	"path/filepath"
 	"runtime"
+	"strings"
 	"time"
 
 	"github.com/openclaw/updater/internal/backup"
@@ -17,6 +18,7 @@ import (
 	"github.com/openclaw/updater/internal/rollback"
 	"github.com/openclaw/updater/internal/version"
 	"github.com/openclaw/updater/pkg/types"
+	"gopkg.in/yaml.v3"
 )
 
 var (
@@ -57,7 +59,7 @@ type Config struct {
 
 func main() {
 	var (
-		configPath   = flag.String("config", "/etc/openclaw/updater.yaml", "配置文件路径")
+		configPath   = flag.String("config", "/etc/openclaw/updater.json", "配置文件路径")
 		checkOnly    = flag.Bool("check", false, "仅检查更新")
 		component    = flag.String("component", "", "指定要更新的组件 (core, wecom, dingtalk, feishu)")
 		sourcePath   = flag.String("source", "", "本地更新源路径")
@@ -152,8 +154,19 @@ func loadConfig(path string) (*Config, error) {
 
 	// 尝试读取配置文件（如果存在）
 	if data, err := os.ReadFile(path); err == nil {
-		if err := json.Unmarshal(data, cfg); err != nil {
-			return nil, fmt.Errorf("failed to parse config: %w", err)
+		ext := strings.ToLower(filepath.Ext(path))
+		switch ext {
+		case ".yaml", ".yml":
+			if err := yaml.Unmarshal(data, cfg); err != nil {
+				return nil, fmt.Errorf("failed to parse yaml config: %w", err)
+			}
+		default:
+			if err := json.Unmarshal(data, cfg); err != nil {
+				// 为兼容历史 YAML 配置，JSON 失败后尝试 YAML。
+				if yamlErr := yaml.Unmarshal(data, cfg); yamlErr != nil {
+					return nil, fmt.Errorf("failed to parse config as json(%v) or yaml(%v)", err, yamlErr)
+				}
+			}
 		}
 	}
 

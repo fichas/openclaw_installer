@@ -10,12 +10,14 @@ export default defineEventHandler(async (event) => {
 
     // 使用 Zod 验证查询参数
     const query = validateQuery(logsQuerySchema, rawQuery)
+    const page = query.page ?? 1
+    const pageSize = query.pageSize ?? 100
 
     const paths = getPlatformPaths()
     const logDir = paths.logDir
 
     if (!existsSync(logDir)) {
-      return { success: true, data: { logs: [], total: 0, page: query.page, pageSize: query.pageSize } }
+      return { success: true, data: { logs: [], total: 0, page, pageSize } }
     }
 
     // 找到最新的 .log 文件
@@ -26,7 +28,7 @@ export default defineEventHandler(async (event) => {
       .reverse()
 
     if (logFiles.length === 0) {
-      return { success: true, data: { logs: [], total: 0, page: query.page, pageSize: query.pageSize } }
+      return { success: true, data: { logs: [], total: 0, page, pageSize } }
     }
 
     const latestLog = join(logDir, logFiles[0])
@@ -46,16 +48,16 @@ export default defineEventHandler(async (event) => {
     const total = lines.length
 
     // 分页（从最新开始）
-    const start = (query.page - 1) * query.pageSize
-    const paginatedLogs = lines.slice(start, start + query.pageSize)
+    const start = (page - 1) * pageSize
+    const paginatedLogs = lines.slice(start, start + pageSize)
 
     return {
       success: true,
       data: {
         logs: paginatedLogs,
         total,
-        page: query.page,
-        pageSize: query.pageSize,
+        page,
+        pageSize,
       },
     }
   } catch (error: any) {

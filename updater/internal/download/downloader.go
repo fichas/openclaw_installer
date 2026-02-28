@@ -10,6 +10,7 @@ import (
 	"net/url"
 	"os"
 	"path/filepath"
+	"sync"
 	"time"
 
 	"github.com/openclaw/updater/pkg/types"
@@ -242,24 +243,33 @@ func (pw *progressWriter) Write(p []byte) (int, error) {
 // DownloadMultiple 并发下载多个组件
 func (d *Downloader) DownloadMultiple(updates []types.UpdateInfo, destDir string) (map[types.ComponentType]string, error) {
 	results := make(map[types.ComponentType]string)
+	var mu sync.Mutex
+	var wg sync.WaitGroup
 	errors := make(chan error, len(updates))
 
 	for _, update := range updates {
+		wg.Add(1)
 		go func(u types.UpdateInfo) {
+			defer wg.Done()
 			path, err := d.DownloadComponent(u, destDir)
 			if err != nil {
 				errors <- fmt.Errorf("failed to download %s: %w", u.Component, err)
 				return
 			}
+			mu.Lock()
 			results[u.Component] = path
+			mu.Unlock()
 			errors <- nil
 		}(update)
 	}
 
-	// 等待所有下载完成
+	wg.Wait()
+	close(errors)
+
+	// 收集下载结果
 	var errs []error
-	for i := 0; i < len(updates); i++ {
-		if err := <-errors; err != nil {
+	for err := range errors {
+		if err != nil {
 			errs = append(errs, err)
 		}
 	}

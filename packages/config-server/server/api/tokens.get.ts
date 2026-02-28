@@ -10,6 +10,7 @@ export default defineEventHandler(async (event) => {
 
     // 使用 Zod 验证查询参数
     const query = validateQuery(tokensQuerySchema, rawQuery)
+    const days = query.days ?? 7
 
     const paths = getPlatformPaths()
     const tokenFile = join(paths.configDir, 'token-usage.json')
@@ -23,7 +24,7 @@ export default defineEventHandler(async (event) => {
 
     // 计算截止日期
     const cutoff = new Date()
-    cutoff.setDate(cutoff.getDate() - query.days)
+    cutoff.setDate(cutoff.getDate() - days)
     const cutoffStr = cutoff.toISOString().split('T')[0]
 
     // 过滤并汇总

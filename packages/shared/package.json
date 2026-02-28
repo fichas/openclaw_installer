@@ -2,6 +2,9 @@
   "name": "@openclaw/shared",
   "version": "2.0.0",
   "private": true,
+  "scripts": {
+    "test": "tsc --noEmit"
+  },
   "main": "./index.ts",
   "types": "./index.ts",
   "exports": {

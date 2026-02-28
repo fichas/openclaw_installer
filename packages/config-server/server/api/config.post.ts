@@ -1,6 +1,6 @@
-import { writeFile, mkdir } from 'node:fs/promises'
+import { writeFile, mkdir, chmod } from 'node:fs/promises'
 import { dirname } from 'node:path'
-import { getPlatformPaths } from '@openclaw/shared'
+import { getPlatformPaths, encryptSensitiveData } from '@openclaw/shared'
 import { configSchema, validateBody } from '../utils/validation'
 
 export default defineEventHandler(async (event) => {
@@ -13,8 +13,14 @@ export default defineEventHandler(async (event) => {
     const paths = getPlatformPaths()
     const configFile = paths.configFile
 
+    const encryptedConfig = encryptSensitiveData(validatedConfig)
+
     await mkdir(dirname(configFile), { recursive: true })
-    await writeFile(configFile, JSON.stringify(validatedConfig, null, 2), 'utf-8')
+    await writeFile(configFile, JSON.stringify(encryptedConfig, null, 2), {
+      encoding: 'utf-8',
+      mode: 0o600,
+    })
+    await chmod(configFile, 0o600).catch(() => {})
 
     return { success: true }
   } catch (error: any) {

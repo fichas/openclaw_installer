@@ -1,136 +1,73 @@
-# OpenClaw 安装器
+# OpenClaw 2.0
 
-跨平台 OpenClaw AI 助手安装器，支持企业微信、钉钉、飞书适配器配置。
+OpenClaw 安装与配置系统（Electron 安装器 + Nuxt 配置服务 + Go updater）。
 
-## 功能特性
+## 架构
 
-- **跨平台支持**: Windows、macOS、Linux (x64 / ARM64)
-- **双模式安装**:
-  - 🖥️ **Wails GUI** - 图形化一键安装
-  - ⌨️ **命令行** - 轻量级 Web 配置界面
-- **离线部署**: 从 U 盘直接安装，无需网络
-- **自动更新**: 内置更新系统
-- **预配置适配器**: 企业微信、钉钉、飞书
+- `packages/installer`: Electron + Nuxt 安装向导（一次性运行）
+- `packages/config-server`: Nuxt 全栈配置服务（默认 `http://localhost:18080`）
+- `packages/shared`: 共享类型与工具函数
+- `updater/`: Go 更新器与更新链路
 
-## 快速开始
+## 开发环境
 
-### 方式一：Wails 图形安装器（推荐）
+- Node.js >= 20
+- pnpm >= 9
+- Go >= 1.22（用于 updater）
 
-下载对应平台的安装器，双击运行：
-
-```bash
-# Windows
-./OpenClaw-Installer.exe
-
-# macOS
-./OpenClaw-Installer.app
-
-# Linux
-./openclaw-installer
-```
-
-### 方式二：U 盘离线安装
-
-1. 从 [Releases](../../releases) 下载 `OpenClaw-v1.0.0.zip`
-2. 解压到 U 盘根目录
-3. 插入目标电脑，运行对应脚本：
+## 常用命令
 
 ```bash
-# Windows - 右键以管理员运行
-.\install.ps1
+# 安装依赖
+pnpm install
 
-# macOS
-./install-mac.command
+# 安装器开发模式
+pnpm dev:installer
 
-# Linux
-sudo ./install-linux.sh
+# 配置服务开发模式
+pnpm dev:config
+
+# Node 工作区测试（类型检查门禁）
+pnpm test
+
+# 构建配置服务
+pnpm build:config
+
+# 构建安装器
+pnpm build:installer
+
+# Go updater 测试
+cd updater && go test ./... && go test -race ./...
 ```
 
-### 方式三：从源码构建
+## 目录结构
 
-```bash
-# 克隆仓库
-git clone https://github.com/yourusername/openclaw-installer.git
-cd openclaw-installer
-
-# 构建命令行安装器
-./scripts/build.sh all
-
-# 或构建 Wails GUI
-cd wails-installer && ./build.sh
+```text
+openclaw/
+├── packages/
+│   ├── installer/
+│   ├── config-server/
+│   └── shared/
+├── updater/
+├── adapters/
+├── scripts/
+├── docs/
+└── .github/workflows/
 ```
 
-## 配置界面
+## 发布流程
 
-安装器启动后会自动打开配置界面：
-
-- **Web 配置**: `http://localhost:18080`
-- **配置项**:
-  - AI 模型设置 (API Key、模型选择)
-  - 企业微信 (CorpID、AgentID、Secret)
-  - 钉钉 (AppKey、AppSecret)
-  - 飞书 (AppID、AppSecret)
-
-## 项目结构
-
-```
-openclaw-installer/
-├── installer/          # 命令行安装器 (Go)
-├── wails-installer/    # Wails 图形安装器
-├── updater/            # 自动更新系统
-├── usb-template/       # U 盘部署模板
-├── adapters/           # IM 适配器配置
-├── scripts/            # 构建脚本
-├── docs/               # 文档
-└── release/            # 发布包模板
-```
-
-## 开发
-
-### 构建
-
-```bash
-# 构建所有平台
-./scripts/build.sh all
-
-# 构建指定平台
-./scripts/build.sh windows    # 或 macos / linux
-
-# 构建 Wails GUI
-cd wails-installer && ./build.sh
-```
-
-### 测试
-
-```bash
-cd installer
-go test -v ./...
-```
-
-### 创建发布
-
-```bash
-./scripts/create-release.sh
-```
-
-## 系统要求
-
-| 平台 | 最低版本 | 架构 |
-|------|---------|------|
-| Windows | Windows 10 | x64, ARM64 |
-| macOS | macOS 10.15 (Catalina) | Intel, Apple Silicon |
-| Linux | Ubuntu 18.04 / CentOS 7 | x64, ARM64 |
+- CI workflow: `.github/workflows/build.yml`
+- 发布前需通过：
+  - `pnpm test`
+  - `cd updater && go test ./... && go test -race ./...`
+  - `pnpm build:config`
+  - 安装器关键流程手动回归（模式页 -> 进度页 -> 完成页）
 
 ## 文档
 
-- [用户指南](docs/USER_GUIDE.md) - 详细安装和配置说明
-- [使用文档](docs/USAGE.md) - 安装器使用指南
-- [测试计划](docs/TEST_PLAN.md) - 安装器测试计划
-- [构建指南](BUILD.md) - 开发和构建文档
-- [架构设计](docs/architecture.md) - 系统设计文档
-- [用户体验设计](docs/ux-design.md) - UI/UX 设计规范
-- [CLAUDE.md](CLAUDE.md) - 项目上下文和开发规范
-
-## 许可证
-
-MIT License
+- [快速上手](docs/QUICK_START.md)
+- [配置指南](docs/CONFIG_GUIDE.md)
+- [常见问题](docs/FAQ.md)
+- [重构设计](docs/plans/2026-03-01-installer-redesign-design.md)
+- [实施计划](docs/plans/2026-03-01-installer-redesign-plan.md)

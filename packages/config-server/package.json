@@ -5,7 +5,8 @@
   "scripts": {
     "dev": "nuxt dev --port 18080",
     "build": "nuxt build",
-    "preview": "nuxt preview"
+    "preview": "nuxt preview",
+    "test": "nuxt prepare && tsc --noEmit"
   },
   "dependencies": {
     "@openclaw/shared": "workspace:*",

@@ -22,12 +22,12 @@
 </template>
 
 <script setup lang="ts">
-import { ref, reactive, onMounted, computed } from 'vue'
+import { reactive, onMounted, computed, onBeforeUnmount } from 'vue'
 import { NProgress, NButton } from 'naive-ui'
 import { useWizard } from '~/composables/useWizard'
 import type { InstallProgress } from '@openclaw/shared'
 
-const { goToStep } = useWizard()
+const { goToStep, installOptions } = useWizard()
 
 const progress = reactive<InstallProgress>({
   step: 0,
@@ -37,25 +37,13 @@ const progress = reactive<InstallProgress>({
   error: undefined,
 })
 
+let disposeProgressListener: (() => void) | null = null
+
 const progressStatus = computed(() => {
   if (progress.error) return 'error'
   if (progress.percent >= 100) return 'success'
   return 'default'
 })
-
-interface InstallStep {
-  message: string
-  percent: number
-  duration: number
-}
-
-const installSteps: InstallStep[] = [
-  { message: '正在创建安装目录...', percent: 10, duration: 800 },
-  { message: '正在复制程序文件...', percent: 35, duration: 1500 },
-  { message: '正在安装 IM 适配器...', percent: 60, duration: 1200 },
-  { message: '正在生成配置文件...', percent: 85, duration: 1000 },
-  { message: '正在启动服务...', percent: 100, duration: 800 },
-]
 
 async function runInstall() {
   progress.error = undefined
@@ -63,36 +51,18 @@ async function runInstall() {
   progress.percent = 0
   progress.message = '准备安装...'
 
-  for (let i = 0; i < installSteps.length; i++) {
-    const step = installSteps[i]
-    progress.step = i + 1
-    progress.message = step.message
-
-    // Simulate gradual progress
-    const startPercent = i === 0 ? 0 : installSteps[i - 1].percent
-    const endPercent = step.percent
-    const duration = step.duration
-    const interval = 50
-    const increments = duration / interval
-    const perIncrement = (endPercent - startPercent) / increments
-
-    for (let j = 0; j < increments; j++) {
-      await new Promise((resolve) => setTimeout(resolve, interval))
-      progress.percent = Math.min(
-        endPercent,
-        Math.round(startPercent + perIncrement * (j + 1))
-      )
-    }
-
-    // Simulate a possible error (in real implementation, actual installation logic goes here)
-    // For now, we simulate success for all steps
+  if (!window.electronAPI?.startInstall) {
+    progress.error = '当前环境不支持安装执行，请在安装器中运行。'
+    return
   }
 
-  progress.message = '安装完成！'
-
-  // Wait a moment before navigating to done page
-  await new Promise((resolve) => setTimeout(resolve, 600))
-  goToStep(5)
+  const result = await window.electronAPI.startInstall(installOptions.value)
+  if (result.success) {
+    await new Promise((resolve) => setTimeout(resolve, 500))
+    goToStep(5)
+  } else {
+    progress.error = result.error || '安装失败，请稍后重试。'
+  }
 }
 
 function retryInstall() {
@@ -100,7 +70,24 @@ function retryInstall() {
 }
 
 onMounted(() => {
+  if (window.electronAPI?.onInstallProgress) {
+    disposeProgressListener = window.electronAPI.onInstallProgress((next) => {
+      progress.step = next.step
+      progress.totalSteps = next.totalSteps
+      progress.message = next.message
+      progress.percent = next.percent
+      progress.error = next.error
+    })
+  }
+
   runInstall()
+})
+
+onBeforeUnmount(() => {
+  if (disposeProgressListener) {
+    disposeProgressListener()
+    disposeProgressListener = null
+  }
 })
 </script>
 

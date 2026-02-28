@@ -183,7 +183,7 @@ Usage: openclaw-updater [options]
 
 Options:`)
 	flag.PrintDefaults()
-	fmt.Println(`
+	fmt.Print(`
 Examples:
   # Check for updates only
   openclaw-updater -check

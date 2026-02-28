@@ -45,11 +45,15 @@ export const tokensQuerySchema = z.object({
 // 完整配置验证 Schema
 export const configSchema = z.object({
   version: z.string().default('2.0.0'),
-  platform: z.string(),
+  platform: z.string().default('unknown'),
   server: z.object({
     host: z.string().default('0.0.0.0'),
     port: z.number().int().min(1).max(65535).default(18080),
     tls: z.boolean().default(false),
+  }).default({
+    host: '0.0.0.0',
+    port: 18080,
+    tls: false,
   }),
   adapters: z.array(adapterConfigSchema).default([]),
   apiKeys: z.array(apiKeySchema).default([]),

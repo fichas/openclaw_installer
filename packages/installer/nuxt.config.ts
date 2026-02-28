@@ -4,7 +4,7 @@ export default defineNuxtConfig({
   electron: {
     build: [
       { entry: 'electron/main.ts' },
-      { entry: 'electron/preload.ts', onstart: { reloadOnChange: true } },
+      { entry: 'electron/preload.ts' },
     ],
   },
   nitro: {

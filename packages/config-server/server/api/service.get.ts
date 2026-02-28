@@ -6,11 +6,11 @@ const execAsync = promisify(exec)
 
 export default defineEventHandler(async () => {
   try {
-    const { platform } = detectPlatform()
+    const { os } = detectPlatform()
     let running = false
     let startTime: string | undefined
 
-    if (platform === 'linux') {
+    if (os === 'linux') {
       try {
         const { stdout } = await execAsync('systemctl is-active openclaw')
         running = stdout.trim() === 'active'
@@ -24,7 +24,7 @@ export default defineEventHandler(async () => {
         // 服务未运行或不存在
         running = false
       }
-    } else if (platform === 'darwin') {
+    } else if (os === 'darwin') {
       try {
         const { stdout } = await execAsync('launchctl list | grep openclaw')
         running = stdout.trim().length > 0
@@ -32,7 +32,7 @@ export default defineEventHandler(async () => {
       } catch {
         running = false
       }
-    } else if (platform === 'windows') {
+    } else if (os === 'windows') {
       try {
         const { stdout } = await execAsync('sc query OpenClaw')
         running = stdout.includes('RUNNING')

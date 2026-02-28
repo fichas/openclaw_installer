@@ -7,7 +7,15 @@ export function detectPlatform(): PlatformInfo {
   const cpuArch = arch()
 
   const normalizedOS: OS = os === 'win32' ? 'windows' : os as OS
-  const normalizedArch: Arch = cpuArch === 'x64' ? 'amd64' : 'arm64'
+  let normalizedArch: Arch
+  if (cpuArch === 'x64') {
+    normalizedArch = 'amd64'
+  } else if (cpuArch === 'arm64') {
+    normalizedArch = 'arm64'
+  } else {
+    // 对未知架构使用最保守的回退值，避免误报为 arm64。
+    normalizedArch = 'amd64'
+  }
 
   return {
     os: normalizedOS,
@@ -34,7 +42,7 @@ export function getPlatformPaths(info?: PlatformInfo): PlatformPaths {
   if (p.isMacOS) {
     const home = process.env.HOME || '/Users'
     return {
-      installDir: '/usr/local/bin',
+      installDir: join(home, 'Applications', 'OpenClaw'),
       configDir: join(home, 'Library', 'Application Support', 'OpenClaw'),
       configFile: join(home, 'Library', 'Application Support', 'OpenClaw', 'config.json'),
       logDir: join(home, 'Library', 'Logs', 'OpenClaw'),
@@ -44,7 +52,7 @@ export function getPlatformPaths(info?: PlatformInfo): PlatformPaths {
   // Linux
   const home = process.env.HOME || '/home'
   return {
-    installDir: '/usr/local/bin',
+    installDir: join(home, '.local', 'share', 'openclaw'),
     configDir: join(home, '.config', 'openclaw'),
     configFile: join(home, '.config', 'openclaw', 'config.json'),
     logDir: join(home, '.local', 'share', 'openclaw', 'logs'),

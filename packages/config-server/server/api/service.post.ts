@@ -33,19 +33,19 @@ export default defineEventHandler(async (event) => {
     // 使用 Zod 严格验证输入
     const { action } = validateBody(serviceActionSchema, body)
 
-    const { platform } = detectPlatform()
+    const { os } = detectPlatform()
 
-    if (platform === 'linux') {
+    if (os === 'linux') {
       // 使用 spawn 传递数组参数，避免 shell 注入
       await spawnPromise('sudo', ['systemctl', action, 'openclaw'])
-    } else if (platform === 'darwin') {
+    } else if (os === 'darwin') {
       const plistPath = `${process.env.HOME}/Library/LaunchAgents/com.openclaw.plist`
       if (action === 'start') {
         await spawnPromise('launchctl', ['load', plistPath])
       } else {
         await spawnPromise('launchctl', ['unload', plistPath])
       }
-    } else if (platform === 'windows') {
+    } else if (os === 'windows') {
       await spawnPromise('sc', [action, 'OpenClaw'])
     }
 
