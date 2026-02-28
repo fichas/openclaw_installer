@@ -108,8 +108,8 @@ async function fetchServiceStatus() {
       serviceRunning.value = res.data.running
       serviceStartTime.value = res.data.startTime || ''
     }
-  } catch {
-    // 获取服务状态失败，保持默认值
+  } catch (err: any) {
+    message.error('获取服务状态失败: ' + (err.message || '请检查网络连接'))
   }
 }
 
@@ -146,8 +146,8 @@ async function fetchTokens() {
       tokenTotal.value = res.data.total
       tokenDaily.value = res.data.daily
     }
-  } catch {
-    // 获取 token 数据失败
+  } catch (err: any) {
+    message.error('获取 Token 用量失败: ' + (err.message || '请检查网络连接'))
   }
 }
 

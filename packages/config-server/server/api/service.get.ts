@@ -21,6 +21,7 @@ export default defineEventHandler(async () => {
           startTime = showOutput.trim()
         }
       } catch {
+        // 服务未运行或不存在
         running = false
       }
     } else if (platform === 'darwin') {
@@ -42,6 +43,9 @@ export default defineEventHandler(async () => {
 
     return { success: true, data: { running, startTime } }
   } catch (error: any) {
-    return { success: false, error: error.message }
+    throw createError({
+      statusCode: 500,
+      statusMessage: error.message || '查询服务状态失败',
+    })
   }
 })

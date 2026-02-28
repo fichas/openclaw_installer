@@ -2,11 +2,14 @@ import { readFile } from 'node:fs/promises'
 import { existsSync } from 'node:fs'
 import { join } from 'node:path'
 import { getPlatformPaths } from '@openclaw/shared'
+import { tokensQuerySchema, validateQuery } from '../utils/validation'
 
 export default defineEventHandler(async (event) => {
   try {
-    const query = getQuery(event)
-    const days = Number(query.days) || 7
+    const rawQuery = getQuery(event)
+
+    // 使用 Zod 验证查询参数
+    const query = validateQuery(tokensQuerySchema, rawQuery)
 
     const paths = getPlatformPaths()
     const tokenFile = join(paths.configDir, 'token-usage.json')
@@ -20,7 +23,7 @@ export default defineEventHandler(async (event) => {
 
     // 计算截止日期
     const cutoff = new Date()
-    cutoff.setDate(cutoff.getDate() - days)
+    cutoff.setDate(cutoff.getDate() - query.days)
     const cutoffStr = cutoff.toISOString().split('T')[0]
 
     // 过滤并汇总
@@ -35,6 +38,13 @@ export default defineEventHandler(async (event) => {
       },
     }
   } catch (error: any) {
-    return { success: false, error: error.message }
+    // 如果是验证错误，直接抛出
+    if (error.statusCode) {
+      throw error
+    }
+    throw createError({
+      statusCode: 500,
+      statusMessage: error.message || '读取 Token 用量失败',
+    })
   }
 })

@@ -10,8 +10,12 @@ function createWindow() {
     resizable: false,
     title: 'OpenClaw 安装器',
     webPreferences: {
-      nodeIntegration: true,
-      contextIsolation: false,
+      // 安全最佳实践：启用上下文隔离
+      contextIsolation: true,
+      // 禁用 Node 集成，通过 preload 暴露必要 API
+      nodeIntegration: false,
+      // 指定 preload 脚本
+      preload: path.join(__dirname, 'preload.js'),
     },
   })
 
@@ -32,6 +36,7 @@ app.on('window-all-closed', () => {
   app.quit()
 })
 
+// IPC 处理器
 ipcMain.on('app-quit', () => {
   app.quit()
 })

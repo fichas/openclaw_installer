@@ -228,8 +228,8 @@ async function fetchConfig() {
         }
       }
     }
-  } catch {
-    // 加载配置失败
+  } catch (err: any) {
+    message.error('加载配置失败: ' + (err.message || '请检查网络连接'))
   }
 }
 

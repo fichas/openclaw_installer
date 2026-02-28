@@ -36,24 +36,24 @@ function handleFinish() {
   if (openConfig.value) {
     // Open the config page in system browser
     const url = 'http://localhost:18080'
-    try {
-      const { shell } = require('electron')
-      shell.openExternal(url)
-    } catch {
-      // Fallback for non-Electron env (dev mode in browser)
+    if (window.electronAPI) {
+      // Electron 环境：使用安全的 preload API
+      window.electronAPI.openExternal(url)
+    } else {
+      // 浏览器环境（开发模式）
       window.open(url, '_blank')
     }
   }
 
   // Quit the Electron app
-  try {
-    const { ipcRenderer } = require('electron')
+  if (window.electronAPI) {
+    // Electron 环境：使用安全的 preload API
     // Give browser a moment to open before quitting
     setTimeout(() => {
-      ipcRenderer.send('app-quit')
+      window.electronAPI?.quitApp()
     }, 500)
-  } catch {
-    // Not in Electron, just close the window
+  } else {
+    // 浏览器环境，关闭窗口
     window.close()
   }
 }

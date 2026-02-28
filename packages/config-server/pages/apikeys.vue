@@ -184,8 +184,8 @@ async function fetchConfig() {
     if (res.success && res.data && Array.isArray(res.data.apiKeys)) {
       apiKeys.value = res.data.apiKeys
     }
-  } catch {
-    // 加载配置失败
+  } catch (err: any) {
+    message.error('加载配置失败: ' + (err.message || '请检查网络连接'))
   }
 }
 

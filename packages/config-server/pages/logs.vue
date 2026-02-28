@@ -30,7 +30,8 @@
         <div v-if="logs.length > 0" class="log-container">
           <pre v-for="(line, i) in logs" :key="i" class="log-line" :class="getLogLevel(line)">{{ line }}</pre>
         </div>
-        <n-empty v-else description="暂无日志" />
+        <n-empty v-else-if="!error" description="暂无日志" />
+        <n-alert v-else type="error" :title="error" />
       </n-spin>
     </n-card>
 
@@ -48,7 +49,9 @@
 
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue'
+import { NSpace, NSelect, NInput, NButton, NCard, NSpin, NEmpty, NAlert, NPagination, useMessage } from 'naive-ui'
 
+const message = useMessage()
 const loading = ref(false)
 const logs = ref<string[]>([])
 const total = ref(0)
@@ -56,6 +59,7 @@ const page = ref(1)
 const pageSize = 100
 const level = ref<string | null>(null)
 const search = ref('')
+const error = ref('')
 
 const pageCount = computed(() => Math.ceil(total.value / pageSize))
 
@@ -80,6 +84,7 @@ onMounted(() => {
 
 async function fetchLogs() {
   loading.value = true
+  error.value = ''
   try {
     const params = new URLSearchParams({
       page: page.value.toString(),
@@ -89,10 +94,21 @@ async function fetchLogs() {
     if (search.value) params.set('search', search.value)
 
     const res = await $fetch(`/api/logs?${params}`)
-    logs.value = res.data.logs
-    total.value = res.data.total
-  } catch {}
-  loading.value = false
+    if (res.success) {
+      logs.value = res.data.logs
+      total.value = res.data.total
+    } else {
+      error.value = res.error || '加载日志失败'
+      message.error(error.value)
+    }
+  } catch (err: any) {
+    error.value = err.message || '加载日志失败，请检查网络连接'
+    message.error(error.value)
+    logs.value = []
+    total.value = 0
+  } finally {
+    loading.value = false
+  }
 }
 </script>
 

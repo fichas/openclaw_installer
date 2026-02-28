@@ -1,38 +1,63 @@
-import { exec } from 'node:child_process'
-import { promisify } from 'node:util'
+import { spawn } from 'node:child_process'
 import { detectPlatform } from '@openclaw/shared'
+import { serviceActionSchema, validateBody } from '../utils/validation'
 
-const execAsync = promisify(exec)
+// 使用 spawn 执行命令，避免 shell 注入
+function spawnPromise(command: string, args: string[]): Promise<void> {
+  return new Promise((resolve, reject) => {
+    const child = spawn(command, args, { stdio: 'pipe' })
+
+    let stderr = ''
+    child.stderr?.on('data', (data) => {
+      stderr += data.toString()
+    })
+
+    child.on('close', (code) => {
+      if (code === 0) {
+        resolve()
+      } else {
+        reject(new Error(stderr || `Command failed with exit code ${code}`))
+      }
+    })
+
+    child.on('error', (err) => {
+      reject(err)
+    })
+  })
+}
 
 export default defineEventHandler(async (event) => {
   try {
     const body = await readBody(event)
-    const action = body.action as 'start' | 'stop'
 
-    if (!action || !['start', 'stop'].includes(action)) {
-      return { success: false, error: '无效的操作，必须为 start 或 stop' }
-    }
+    // 使用 Zod 严格验证输入
+    const { action } = validateBody(serviceActionSchema, body)
 
     const { platform } = detectPlatform()
 
     if (platform === 'linux') {
-      await execAsync(`sudo systemctl ${action} openclaw`)
+      // 使用 spawn 传递数组参数，避免 shell 注入
+      await spawnPromise('sudo', ['systemctl', action, 'openclaw'])
     } else if (platform === 'darwin') {
+      const plistPath = `${process.env.HOME}/Library/LaunchAgents/com.openclaw.plist`
       if (action === 'start') {
-        await execAsync('launchctl load ~/Library/LaunchAgents/com.openclaw.plist')
+        await spawnPromise('launchctl', ['load', plistPath])
       } else {
-        await execAsync('launchctl unload ~/Library/LaunchAgents/com.openclaw.plist')
+        await spawnPromise('launchctl', ['unload', plistPath])
       }
     } else if (platform === 'windows') {
-      if (action === 'start') {
-        await execAsync('sc start OpenClaw')
-      } else {
-        await execAsync('sc stop OpenClaw')
-      }
+      await spawnPromise('sc', [action, 'OpenClaw'])
     }
 
     return { success: true }
   } catch (error: any) {
-    return { success: false, error: error.message }
+    // 如果是验证错误，直接抛出
+    if (error.statusCode) {
+      throw error
+    }
+    throw createError({
+      statusCode: 500,
+      statusMessage: error.message || '服务操作失败',
+    })
   }
 })

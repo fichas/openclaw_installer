@@ -1,6 +1,6 @@
 import { readFile } from 'node:fs/promises'
 import { existsSync } from 'node:fs'
-import { getPlatformPaths } from '@openclaw/shared'
+import { getPlatformPaths, decryptSensitiveData } from '@openclaw/shared'
 
 export default defineEventHandler(async () => {
   try {
@@ -13,8 +13,15 @@ export default defineEventHandler(async () => {
 
     const content = await readFile(configFile, 'utf-8')
     const data = JSON.parse(content)
-    return { success: true, data }
+
+    // 解密敏感数据
+    const decryptedData = decryptSensitiveData(data)
+
+    return { success: true, data: decryptedData }
   } catch (error: any) {
-    return { success: false, error: error.message }
+    throw createError({
+      statusCode: 500,
+      statusMessage: error.message || '读取配置失败',
+    })
   }
 })
