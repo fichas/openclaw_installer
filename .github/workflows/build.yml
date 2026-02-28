@@ -18,10 +18,10 @@ jobs:
       - name: Run tests
         run: |
           cd installer
-          go test -v -race -coverprofile=coverage.out ./...
+          go test -v -race ./...
 
-  # 构建所有平台的命令行安装器
-  build-cli:
+  # 构建命令行安装器 (所有平台)
+  build:
     needs: test
     runs-on: ubuntu-latest
     strategy:
@@ -44,7 +44,7 @@ jobs:
       - uses: actions/setup-go@v5
         with:
           go-version: '1.22'
-      - name: Build CLI installer
+      - name: Build
         env:
           GOOS: ${{ matrix.goos }}
           GOARCH: ${{ matrix.goarch }}
@@ -55,149 +55,55 @@ jobs:
             output_name="${output_name}.exe"
           fi
           go build -ldflags "-s -w -X main.Version=${{ github.ref_name }}" -o "../dist/${output_name}"
-      - name: Upload CLI artifact
+      - name: Upload
         uses: actions/upload-artifact@v4
         with:
-          name: openclaw-installer-${{ matrix.goos }}-${{ matrix.goarch }}
+          name: installer-${{ matrix.goos }}-${{ matrix.goarch }}
           path: dist/openclaw-installer-*
 
-  # 构建 Wails GUI (Windows)
-  build-wails-windows:
-    needs: test
-    runs-on: windows-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-go@v5
-        with:
-          go-version: '1.22'
-      - name: Install Wails
-        run: go install github.com/wailsapp/wails/v2/cmd/wails@latest
-      - name: Install WebView2 Runtime
-        run: |
-          choco install microsoft-edge-webview2-runtime -y
-      - name: Build Wails GUI
-        shell: pwsh
-        run: |
-          cd wails-installer
-          wails build -platform windows/amd64 -ldflags "-X main.Version=${{ github.ref_name }}" -o "../dist/OpenClaw-Installer.exe"
-      - name: Upload artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: OpenClaw-Installer-Windows
-          path: dist/OpenClaw-Installer.exe
-
-  # 构建 Wails GUI (macOS)
-  build-wails-macos:
-    needs: test
-    runs-on: macos-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-go@v5
-        with:
-          go-version: '1.22'
-      - name: Install Wails
-        run: go install github.com/wailsapp/wails/v2/cmd/wails@latest
-      - name: Build Wails GUI (Universal Binary)
-        run: |
-          cd wails-installer
-          # 构建 AMD64
-          wails build -platform darwin/amd64 -ldflags "-X main.Version=${{ github.ref_name }}" -o "../dist/OpenClaw-Installer-macOS-amd64"
-          # 构建 ARM64
-          wails build -platform darwin/arm64 -ldflags "-X main.Version=${{ github.ref_name }}" -o "../dist/OpenClaw-Installer-macOS-arm64"
-          # 创建通用二进制
-          lipo -create -output ../dist/OpenClaw-Installer-macOS ../dist/OpenClaw-Installer-macOS-amd64 ../dist/OpenClaw-Installer-macOS-arm64 || true
-      - name: Upload artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: OpenClaw-Installer-macOS
-          path: dist/OpenClaw-Installer-macOS*
-
-  # 构建 Wails GUI (Linux)
-  build-wails-linux:
-    needs: test
-    runs-on: ubuntu-20.04
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-go@v5
-        with:
-          go-version: '1.22'
-      - name: Install dependencies
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y libgtk-3-dev libwebkit2gtk-4.0-dev gcc pkg-config
-      - name: Install Wails
-        run: go install github.com/wailsapp/wails/v2/cmd/wails@latest
-      - name: Build Wails GUI
-        run: |
-          cd wails-installer
-          wails build -platform linux/amd64 -ldflags "-X main.Version=${{ github.ref_name }}" -o "../dist/OpenClaw-Installer-linux"
-      - name: Upload artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: OpenClaw-Installer-Linux
-          path: dist/OpenClaw-Installer-linux
-
-  # 创建发布包
+  # 创建发布
   release:
-    needs: [build-cli, build-wails-windows, build-wails-macos, build-wails-linux]
+    needs: build
     runs-on: ubuntu-latest
-    if: always() && startsWith(github.ref, 'refs/tags/')
+    if: startsWith(github.ref, 'refs/tags/')
     steps:
       - uses: actions/checkout@v4
-      - name: Download all artifacts
+      - name: Download artifacts
         uses: actions/download-artifact@v4
         with:
           path: artifacts
-          merge-multiple: true
       - name: Create release package
         run: |
-          mkdir -p release/OpenClaw
+          mkdir -p release/OpenClaw/{windows,macos,linux,shared}
 
-          # 复制 GUI 安装器
-          cp artifacts/OpenClaw-Installer.exe release/OpenClaw/ 2>/dev/null || echo "Windows GUI not found"
-          cp artifacts/OpenClaw-Installer-macOS release/OpenClaw/ 2>/dev/null || echo "macOS GUI not found"
-          cp artifacts/OpenClaw-Installer-linux release/OpenClaw/ 2>/dev/null || echo "Linux GUI not found"
+          # Windows
+          cp artifacts/installer-windows-amd64/openclaw-installer-windows-amd64.exe release/OpenClaw/windows/OpenClaw-Installer.exe
+          cp artifacts/installer-windows-arm64/openclaw-installer-windows-arm64.exe release/OpenClaw/windows/ 2>/dev/null || true
+          cp usb-template/install.bat release/OpenClaw/windows/
+          cp usb-template/install.ps1 release/OpenClaw/windows/
 
-          # 复制 CLI 安装器
-          mkdir -p release/OpenClaw/cli
-          cp artifacts/openclaw-installer-* release/OpenClaw/cli/ 2>/dev/null || true
+          # macOS
+          cp artifacts/installer-darwin-amd64/openclaw-installer-darwin-amd64 release/OpenClaw/macos/OpenClaw-Installer
+          cp artifacts/installer-darwin-arm64/openclaw-installer-darwin-arm64 release/OpenClaw/macos/ 2>/dev/null || true
+          cp usb-template/install-mac.command release/OpenClaw/macos/
 
-          # 复制适配器配置
-          mkdir -p release/OpenClaw/adapters
-          cp -r adapters/* release/OpenClaw/adapters/
+          # Linux
+          cp artifacts/installer-linux-amd64/openclaw-installer-linux-amd64 release/OpenClaw/linux/OpenClaw-Installer
+          cp artifacts/installer-linux-arm64/openclaw-installer-linux-arm64 release/OpenClaw/linux/ 2>/dev/null || true
+          cp usb-template/install-linux.sh release/OpenClaw/linux/
 
-          # 创建启动脚本
-          cat > release/OpenClaw/README.txt << 'EOF'
-OpenClaw Installer
-==================
+          # Shared
+          cp -r adapters release/OpenClaw/shared/
+          cp usb-template/README.txt release/OpenClaw/
+          echo "${{ github.ref_name }}" > release/OpenClaw/VERSION.txt
 
-使用方法:
-
-Windows:
-  双击 OpenClaw-Installer.exe
-
-macOS:
-  双击 OpenClaw-Installer-macOS
-  或运行: ./OpenClaw-Installer-macOS
-
-Linux:
-  双击 OpenClaw-Installer-linux
-  或运行: ./OpenClaw-Installer-linux
-
-命令行安装器 (高级用户):
-  cli/ 目录包含各平台的命令行版本
-EOF
-
-          # 创建 ZIP
+          # Create ZIP
           cd release
           zip -r OpenClaw-${{ github.ref_name }}.zip OpenClaw/
       - name: Create Release
         uses: softprops/action-gh-release@v1
         with:
           files: |
-            artifacts/OpenClaw-Installer.exe
-            artifacts/OpenClaw-Installer-macOS
-            artifacts/OpenClaw-Installer-linux
-            artifacts/openclaw-installer-*
-            release/OpenClaw-${{ github.ref_name }}.zip
+            artifacts/**/openclaw-installer-*
+            release/OpenClaw-*.zip
           generate_release_notes: true
