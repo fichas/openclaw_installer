@@ -55,7 +55,7 @@ jobs:
       - uses: actions/upload-artifact@v4
         with:
           name: installer-${{ matrix.targets }}
-          path: packages/installer/dist-electron/*
+          path: packages/installer/release/*
 
   build-config-server:
     needs: test

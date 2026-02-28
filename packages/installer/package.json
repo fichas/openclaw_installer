@@ -2,6 +2,9 @@
   "name": "@openclaw/installer",
   "version": "2.0.0",
   "private": true,
+  "description": "OpenClaw AI 助手安装器",
+  "homepage": "https://github.com/openclaw/openclaw",
+  "author": "OpenClaw Team <team@openclaw.io>",
   "main": "dist-electron/main.js",
   "scripts": {
     "dev": "nuxt dev",
@@ -26,7 +29,8 @@
   "build": {
     "appId": "com.openclaw.installer",
     "productName": "OpenClaw 安装器",
-    "directories": { "output": "dist-electron" },
+    "directories": { "output": "release" },
+    "artifactName": "${productName}-${version}-${arch}.${ext}",
     "nsis": {
       "oneClick": false,
       "allowToChangeInstallationDirectory": false,
