@@ -30,6 +30,12 @@ var assets embed.FS
 //go:embed build/appicon.png
 var icon []byte
 
+// 版本信息（由构建时注入）
+var (
+	Version   = "dev"
+	BuildTime = "unknown"
+)
+
 // Logger 全局日志记录器
 var logger *log.Logger
 
@@ -176,7 +182,7 @@ func (a *App) LaunchApp() error {
 
 // GetVersion 获取安装器版本
 func (a *App) GetVersion() string {
-	return "1.0.0"
+	return Version
 }
 
 func main() {
