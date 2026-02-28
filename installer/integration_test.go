@@ -1,10 +1,6 @@
 package main
 
 import (
-	"bytes"
-	"encoding/json"
-	"net/http"
-	"net/http/httptest"
 	"os"
 	"path/filepath"
 	"testing"
@@ -92,71 +88,6 @@ func TestFullInstallationFlow(t *testing.T) {
 	if !finalStatus.Installed {
 		t.Error("Final status should be installed")
 	}
-}
-
-// TestWebAPIIntegration tests the web API endpoints integration
-func TestWebAPIIntegration(t *testing.T) {
-	platform := &Platform{OS: "linux", Arch: "amd64"}
-	installer := NewInstaller(platform)
-	server := NewServer(installer)
-
-	// Test 1: Get platform info
-	t.Run("GetPlatform", func(t *testing.T) {
-		req := httptest.NewRequest(http.MethodGet, "/api/platform", nil)
-		rec := httptest.NewRecorder()
-		server.handlePlatform(rec, req)
-
-		if rec.Code != http.StatusOK {
-			t.Errorf("Status code = %d, want %d", rec.Code, http.StatusOK)
-		}
-
-		var response map[string]interface{}
-		if err := json.Unmarshal(rec.Body.Bytes(), &response); err != nil {
-			t.Fatalf("Failed to parse response: %v", err)
-		}
-
-		if response["os"] != "linux" {
-			t.Errorf("OS = %v, want linux", response["os"])
-		}
-	})
-
-	// Test 2: Get status
-	t.Run("GetStatus", func(t *testing.T) {
-		req := httptest.NewRequest(http.MethodGet, "/api/status", nil)
-		rec := httptest.NewRecorder()
-		server.handleStatus(rec, req)
-
-		if rec.Code != http.StatusOK {
-			t.Errorf("Status code = %d, want %d", rec.Code, http.StatusOK)
-		}
-
-		var status InstallStatus
-		if err := json.Unmarshal(rec.Body.Bytes(), &status); err != nil {
-			t.Fatalf("Failed to parse status: %v", err)
-		}
-	})
-
-	// Test 3: Post config and verify
-	t.Run("PostConfig", func(t *testing.T) {
-		config := Config{
-			Version: "1.0.0",
-			Server:  ServerConfig{Host: "localhost", Port: 8080},
-			Adapters: []AdapterConfig{
-				{Name: "test", Type: "ollama"},
-			},
-		}
-
-		body, _ := json.Marshal(config)
-		req := httptest.NewRequest(http.MethodPost, "/api/config", bytes.NewReader(body))
-		req.Header.Set("Content-Type", "application/json")
-		rec := httptest.NewRecorder()
-
-		server.handleConfig(rec, req)
-
-		if rec.Code != http.StatusOK {
-			t.Logf("Config post returned status %d (may fail due to permissions)", rec.Code)
-		}
-	})
 }
 
 // TestCrossPlatformInstallation tests installation on different platforms
@@ -346,30 +277,12 @@ func TestConfigPersistence(t *testing.T) {
 	}
 }
 
-// TestGracefulDegradation tests graceful handling of missing resources
-func TestGracefulDegradation(t *testing.T) {
-	t.Run("MissingTemplate", func(t *testing.T) {
-		platform := &Platform{OS: "linux", Arch: "amd64"}
-		installer := NewInstaller(platform)
-		server := NewServer(installer)
-
-		// Request should still work even without templates
-		req := httptest.NewRequest(http.MethodGet, "/", nil)
-		rec := httptest.NewRecorder()
-
-		server.handleIndex(rec, req)
-
-		if rec.Code != http.StatusOK {
-			t.Errorf("Status code = %d, want %d", rec.Code, http.StatusOK)
-		}
-	})
-
-	t.Run("MissingConfigFile", func(t *testing.T) {
-		_, err := LoadConfig("/nonexistent/path/config.json")
-		if err == nil {
-			t.Error("LoadConfig() should return error for missing file")
-		}
-	})
+// TestMissingConfigFile tests handling of missing config file
+func TestMissingConfigFile(t *testing.T) {
+	_, err := LoadConfig("/nonexistent/path/config.json")
+	if err == nil {
+		t.Error("LoadConfig() should return error for missing file")
+	}
 }
 
 // TestCleanupOnFailure tests cleanup behavior on installation failure

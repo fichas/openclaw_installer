@@ -42,6 +42,19 @@ type ConfigOptions struct {
 	CustomSettings map[string]string
 }
 
+// InstallRequest represents the installation request from CLI or API
+type InstallRequest struct {
+	SourceDir    string            `json:"source_dir"`
+	InstallDir   string            `json:"install_dir"`
+	ServerHost   string            `json:"server_host"`
+	ServerPort   int               `json:"server_port"`
+	EnableTLS    bool              `json:"enable_tls"`
+	AdapterType  string            `json:"adapter_type"`
+	AdapterName  string            `json:"adapter_name"`
+	Version      string            `json:"version"`
+	Settings     map[string]string `json:"settings,omitempty"`
+}
+
 // GenerateConfig creates a new configuration from options
 func GenerateConfig(opts ConfigOptions) (*Config, error) {
 	platform := DetectPlatform()
