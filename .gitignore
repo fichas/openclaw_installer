@@ -6,11 +6,19 @@
 openclaw-installer
 openclaw-updater
 
-# Build directories
-dist/
-build/
-release/
-usb-deploy/
+# Build directories (keep directory structure but ignore contents)
+/dist/*
+!/dist/.gitkeep
+/build/*
+!/build/.gitkeep
+
+# Release packages (large binaries, keep only checksums)
+/release/*.zip
+/release/*.tar.gz
+
+# USB deploy contents
+/usb-deploy/*
+!/usb-deploy/.gitkeep
 
 # Test coverage
 coverage.out

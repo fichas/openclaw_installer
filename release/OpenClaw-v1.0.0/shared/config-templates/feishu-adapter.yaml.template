@@ -1,0 +1,4 @@
+# Feishu Adapter Configuration
+webhook_url: "https://open.feishu.cn/open-apis/bot/v2/hook/YOUR_TOKEN"
+app_id: "YOUR_APP_ID"
+app_secret: "YOUR_APP_SECRET"

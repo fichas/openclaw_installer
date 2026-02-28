@@ -1,0 +1,3 @@
+# DingTalk Adapter Configuration
+webhook_url: "https://oapi.dingtalk.com/robot/send?access_token=YOUR_TOKEN"
+secret: "YOUR_SECRET"

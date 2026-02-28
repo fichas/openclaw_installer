@@ -1,0 +1,4 @@
+# WeCom Adapter Configuration
+webhook_url: "https://qyapi.weixin.qq.com/cgi-bin/webhook/send?key=YOUR_KEY"
+corp_id: "YOUR_CORP_ID"
+corp_secret: "YOUR_CORP_SECRET"

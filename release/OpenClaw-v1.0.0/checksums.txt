@@ -1,0 +1,35 @@
+OpenClaw v1.0.0 SHA256 Checksums
+Generated: 2026-02-27 19:33:52 UTC
+========================================
+
+Windows Binaries:
+-----------------
+4116dfc1142abe57ccc005269e9be5ec98705837b8f0d9550f20092832480dbf  windows/openclaw-installer-windows-amd64.exe
+d80ad68715a60eb88c119170f5879a73a404d14c9d3d58b6fd4e9d9f5031bd03  windows/openclaw-installer-windows-arm64.exe
+
+macOS Binaries:
+---------------
+2bcef749b772297bd68872ccc36e0acfb9f1b923a27b994b7bc49238fcfa0578  macos/OpenClaw-Installer-darwin-amd64
+d49ace7df354d9807035d4999cd1565c5e53d9e3ae7cf06df65d6b40c6d04cf6  macos/OpenClaw-Installer-darwin-arm64
+
+Linux Binaries:
+---------------
+efa98563ad96dfc0c6dc2d3c0cbaf12b7af25884e57f798502a2a16d23005578  linux/openclaw-installer-linux-amd64
+901bef4adb67c3de2a26d07464647174edd7b66c000792f37f63ecb66d60bf47  linux/openclaw-installer-linux-arm64
+
+Installation Scripts:
+--------------------
+2c70f4724325038b8216ca8346b7a106d0700a7d8e7aa73360252846cae3fc08  windows/install.bat
+45049a2525bd991899b0b4d5fe22f840d28ec8ae677e1dd36192db0b328f3715  windows/install.ps1
+d5b502784e5ea2b6e2378f05074804e00c414e6ac824fada2098e4bf03844d29  macos/install-mac.command
+4d55aabb98e0e221d6548105f6c66019209a3f0c4b500220e037be541a452115  linux/install-linux.sh
+
+Configuration Files:
+-------------------
+99b57193874b849d6f68f69fffe45f89e73e58f8262ada6fccbe26329b30780f  shared/config-templates/feishu-adapter.yaml.template
+6e06adaac82e4b38e510111c7e8ab62708d3951b00c9174eda53c90efa1e749a  shared/config-templates/dingtalk-adapter.yaml.template
+43bad6e1d67db52179b31c065e0746690c9c962f975f99157b4477cd7f6ce38e  shared/config-templates/openclaw.yaml.template
+59ca2771b44c5fa62691476bfd20a84f1da6c18f27e38ee95fbe637aaa21599c  shared/config-templates/wecom-adapter.yaml.template
+00f6ae0bf18644b98c2fe64edcb02ba3dd427a69d7b55a68b1826151cb928dec  shared/adapters/dingtalk/adapter.json
+cb967c2b29ea98f8f5c75ec26b6bd376448d785418e54afa628cb13a72c1008f  shared/adapters/feishu/adapter.json
+94b2936c8850496bfc1fecd8711353bfcfa428128ac244889c17b5bafac576c6  shared/adapters/wechat-work/adapter.json

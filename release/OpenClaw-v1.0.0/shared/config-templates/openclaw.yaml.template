@@ -1,0 +1,13 @@
+# OpenClaw Configuration Template
+server:
+  port: 8080
+  host: 0.0.0.0
+
+log:
+  level: info
+  file: /var/log/openclaw/openclaw.log
+
+adapters:
+  - wecom
+  - dingtalk
+  - feishu
