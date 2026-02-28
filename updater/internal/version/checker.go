@@ -92,7 +92,7 @@ func (c *Checker) GetInstalledVersion(component types.ComponentType, installPath
 
 	// 回退：尝试执行二进制文件获取版本
 	binaryName := c.getBinaryName(component)
-	binaryPath := filepath.Join(installPath, binaryName)
+	_ = filepath.Join(installPath, binaryName) // 保留以备后续使用
 
 	// 这里可以执行 binaryPath --version 来获取版本
 	// 简化处理：返回未知版本

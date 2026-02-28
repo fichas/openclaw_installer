@@ -307,7 +307,7 @@ func doUpdate(cfg *Config, options types.UpdateOptions) error {
 		}
 
 		// 保留配置
-		if err := configPreserver.PreserveAndMerge(string(component), packagePath); err != nil {
+		if err := configPreserver.PreserveAndMerge(component, packagePath); err != nil {
 			fmt.Fprintf(os.Stderr, "Warning: failed to preserve config for %s: %v\n", component, err)
 		}
 	}
@@ -395,12 +395,12 @@ func getInstallPaths(cfg *Config) map[types.ComponentType]string {
 	return paths
 }
 
-func getConfigPaths(cfg *Config) map[string]string {
-	paths := make(map[string]string)
-	paths["core"] = filepath.Join(cfg.Paths.ConfigDir, "openclaw.yaml")
-	paths["wecom-adapter"] = filepath.Join(cfg.Paths.ConfigDir, "wecom-adapter.yaml")
-	paths["dingtalk-adapter"] = filepath.Join(cfg.Paths.ConfigDir, "dingtalk-adapter.yaml")
-	paths["feishu-adapter"] = filepath.Join(cfg.Paths.ConfigDir, "feishu-adapter.yaml")
+func getConfigPaths(cfg *Config) map[types.ComponentType]string {
+	paths := make(map[types.ComponentType]string)
+	paths[types.ComponentCore] = filepath.Join(cfg.Paths.ConfigDir, "openclaw.yaml")
+	paths[types.ComponentWecom] = filepath.Join(cfg.Paths.ConfigDir, "wecom-adapter.yaml")
+	paths[types.ComponentDingtalk] = filepath.Join(cfg.Paths.ConfigDir, "dingtalk-adapter.yaml")
+	paths[types.ComponentFeishu] = filepath.Join(cfg.Paths.ConfigDir, "feishu-adapter.yaml")
 	return paths
 }
 

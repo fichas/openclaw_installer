@@ -7,23 +7,24 @@ import (
 	"path/filepath"
 	"strings"
 
+	"github.com/openclaw/updater/pkg/types"
 	"gopkg.in/yaml.v3"
 )
 
 // Preserver 提供配置保留功能
 type Preserver struct {
-	configPaths map[string]string
+	configPaths map[types.ComponentType]string
 }
 
 // NewPreserver 创建新的配置保留器
-func NewPreserver(configPaths map[string]string) *Preserver {
+func NewPreserver(configPaths map[types.ComponentType]string) *Preserver {
 	return &Preserver{
 		configPaths: configPaths,
 	}
 }
 
 // PreserveAndMerge 保留用户配置并合并新配置
-func (p *Preserver) PreserveAndMerge(componentName, newConfigDir string) error {
+func (p *Preserver) PreserveAndMerge(componentName types.ComponentType, newConfigDir string) error {
 	userConfigPath := p.configPaths[componentName]
 	if userConfigPath == "" {
 		// 没有现有配置，直接使用新配置
@@ -43,7 +44,7 @@ func (p *Preserver) PreserveAndMerge(componentName, newConfigDir string) error {
 	}
 
 	// 读取新配置（作为模板）
-	newConfigPath := filepath.Join(newConfigDir, componentName+".yaml")
+	newConfigPath := filepath.Join(newConfigDir, string(componentName)+".yaml")
 	newConfig, err := p.loadConfig(newConfigPath)
 	if err != nil {
 		// 新配置可能不存在，使用用户配置
@@ -120,7 +121,7 @@ func (p *Preserver) mergeConfigs(userConfig, newConfig map[string]interface{}) m
 }
 
 // BackupConfig 备份配置文件
-func (p *Preserver) BackupConfig(componentName, backupDir string) (string, error) {
+func (p *Preserver) BackupConfig(componentName types.ComponentType, backupDir string) (string, error) {
 	configPath := p.configPaths[componentName]
 	if configPath == "" {
 		return "", nil
@@ -163,7 +164,7 @@ func (p *Preserver) copyFile(src, dst string) error {
 }
 
 // GetConfigPaths 获取所有配置文件路径
-func (p *Preserver) GetConfigPaths() map[string]string {
+func (p *Preserver) GetConfigPaths() map[types.ComponentType]string {
 	return p.configPaths
 }
 
