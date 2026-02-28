@@ -1,63 +1,70 @@
 # OpenClaw 安装器
 
-OpenClaw AI 助手的跨平台安装器，提供基于 Web 的配置界面。支持 Windows、macOS 和 Linux，具备离线 U 盘部署能力。
+OpenClaw AI 助手的跨平台安装器与配置管理系统。基于 Electron + Nuxt 3 的图形化安装向导，以及安装后常驻的 Web 配置服务。支持 Windows、macOS 和 Linux，具备离线安装能力。
 
 ## 项目概述
 
-OpenClaw 安装器是一个基于 Go 的安装工具，提供以下功能：
+- **图形化安装器**: Electron + Nuxt 3 桌面应用，向导式点击安装
+- **Web 配置服务**: Nuxt 全栈应用，安装后常驻后台，浏览器访问 `localhost:18080` 管理配置
 - **跨平台支持**: Windows (amd64/arm64)、macOS (Intel/Apple Silicon)、Linux (amd64/arm64)
-- **离线安装**: 无需网络连接，直接从 U 盘部署
-- **Web 配置**: 内置 HTTP 服务器 (端口 18080) 进行配置
+- **离线安装**: 安装包内嵌所有依赖，安装过程零网络请求
 - **IM 适配器**: 预配置支持企业微信、钉钉、飞书
-- **图形安装器**: 基于 Wails 的桌面应用，一键安装
-- **自动更新**: 内置更新机制，无缝升级
+- **中国大陆友好**: 不依赖境外服务，构建使用 npmmirror
 
-## 快速开始
+## 技术栈
 
-```bash
-# 构建所有组件
-./scripts/build.sh all
-
-# 构建指定平台
-./scripts/build.sh windows
-./scripts/build.sh macos
-./scripts/build.sh linux
-
-# 构建 Wails 图形安装器
-cd wails-installer && ./build.sh
-
-# 创建发布包
-./scripts/create-release.sh
-```
+- **运行时**: Node.js 20 LTS
+- **包管理**: pnpm workspace (Monorepo)
+- **框架**: Nuxt 3 + Vue 3
+- **语言**: TypeScript
+- **UI 组件库**: Naive UI
+- **桌面应用**: Electron + electron-builder
+- **Nuxt-Electron 集成**: nuxt-electron 模块
 
 ## 项目结构
 
 ```
-├── adapters/           # IM 适配器配置 (企业微信/钉钉/飞书)
-├── build/              # 构建产物 (git 忽略)
-├── dist/               # 分发包 (git 忽略)
-├── docs/               # 文档
-│   ├── architecture.md # 系统架构
-│   ├── USER_GUIDE.md   # 用户文档 (中文)
-│   └── *.md           # 设计文档、测试计划等
-├── frontend/           # Web 配置界面 (静态文件)
-├── installer/          # 命令行安装器 (Go)
-│   ├── main.go        # CLI 入口
-│   ├── server.go      # Web UI 的 HTTP 服务器
-│   ├── config.go      # 配置管理
-│   └── *_test.go      # 单元测试
-├── release/            # 发布包模板
-│   └── OpenClaw-v1.0.0/ # 各平台安装脚本
-├── scripts/            # 构建和工具脚本
-│   ├── build.sh       # 主构建脚本
-│   ├── build-*.sh     # 各平台专用构建
-│   └── create-release.sh # 发布打包
-├── updater/            # 自动更新系统
-├── usb-template/       # U 盘部署模板文件
-└── wails-installer/    # 基于 Wails 的图形安装器
-    ├── main.go        # Wails 入口
-    ├── frontend/      # GUI 前端 (HTML/CSS/JS)
-    └── internal/      # 安装器逻辑模块
+openclaw/
+├── packages/
+│   ├── installer/              # Electron + Nuxt 安装向导
+│   │   ├── electron/           # Electron 主进程 (main.ts, preload.ts)
+│   │   ├── pages/              # 安装步骤页面
+│   │   │   ├── index.vue       # 欢迎页
+│   │   │   ├── mode.vue        # 安装模式选择
+│   │   │   ├── adapter.vue     # IM 适配器选择
+│   │   │   ├── confirm.vue     # 安装确认
+│   │   │   ├── progress.vue    # 安装进度
+│   │   │   └── done.vue        # 完成页
+│   │   ├── nuxt.config.ts
+│   │   └── package.json
+│   │
+│   ├── config-server/          # Nuxt 全栈 Web 配置服务
+│   │   ├── pages/
+│   │   │   ├── index.vue       # 仪表盘（状态 + Token 用量 + 服务开关）
+│   │   │   ├── apikeys.vue     # API Key 管理
+│   │   │   ├── adapters.vue    # IM 适配器配置
+│   │   │   └── logs.vue        # 日志查看（分页加载）
+│   │   ├── server/
+│   │   │   ├── api/config.ts   # 配置读写 API
+│   │   │   ├── api/service.ts  # 服务启停 API
+│   │   │   ├── api/tokens.ts   # Token 用量查询 API
+│   │   │   └── api/logs.ts     # 日志查询 API（分页）
+│   │   ├── nuxt.config.ts
+│   │   └── package.json
+│   │
+│   └── shared/                 # 共享代码
+│       ├── components/         # 共享 Vue 组件
+│       ├── types/              # TypeScript 类型定义
+│       └── utils/              # 工具函数（平台检测等）
+│
+├── adapters/                   # IM 适配器配置 (企业微信/钉钉/飞书)
+├── docs/                       # 文档
+│   ├── plans/                  # 设计文档
+│   └── *.md                    # 用户指南、架构、测试计划等
+├── scripts/                    # 构建与发布脚本
+├── pnpm-workspace.yaml
+├── package.json
+└── tsconfig.json
 ```
 
 ## 常用命令
@@ -65,107 +72,94 @@ cd wails-installer && ./build.sh
 ### 开发
 
 ```bash
-# 运行测试
-cd installer && go test ./...
+# 安装依赖
+pnpm install
 
-# 运行并生成覆盖率报告
-go test -coverprofile=coverage.out ./...
-go tool cover -html=coverage.out -o coverage.html
+# 启动安装器开发模式
+pnpm --filter @openclaw/installer dev
 
-# 格式化代码
-go fmt ./...
+# 启动配置服务开发模式
+pnpm --filter @openclaw/config-server dev
 
 # 代码检查
-golangci-lint run
+pnpm lint
+
+# 运行测试
+pnpm test
 ```
 
 ### 构建
 
 ```bash
-# 构建所有平台
-./scripts/build.sh all
+# 构建所有包
+pnpm build
 
-# 指定版本构建
-VERSION=1.1.0 ./scripts/build.sh macos
+# 构建安装器（Electron 打包）
+pnpm --filter @openclaw/installer build
 
-# 构建 Wails GUI
-cd wails-installer && ./build.sh
-
-# 交叉编译 (需要 Docker)
-./scripts/build-linux.sh --docker
-```
-
-### 测试
-
-```bash
-# 运行所有测试
-cd installer && go test -v ./...
-
-# 运行集成测试
-go test -tags=integration -v ./...
-
-# 测试指定组件
-go test -v -run TestInstaller ./...
+# 构建配置服务
+pnpm --filter @openclaw/config-server build
 ```
 
 ### 发布
 
 ```bash
-# 创建发布包
-./scripts/create-release.sh
-
-# 版本升级
-./scripts/create-release.sh --version 1.1.0
-
-# 清理并重建
-./scripts/create-release.sh --clean --build
+# 创建发布包（各平台安装器）
+pnpm --filter @openclaw/installer package
 ```
 
 ## 架构
 
 ### 组件
 
-1. **命令行安装器** (`installer/`)
-   - 基于 Go 的 CLI 工具
-   - 使用 `//go:embed` 嵌入静态 Web UI
-   - HTTP 服务器提供配置界面 (端口 18080)
-   - 跨平台编译支持
+1. **Electron 安装器** (`packages/installer/`)
+   - Electron + Nuxt 3 桌面应用
+   - 六步线性向导：欢迎 → 模式 → 适配器 → 确认 → 进度 → 完成
+   - 默认选项覆盖 90% 场景，连点"下一步"即可安装
+   - 安装完成自动打开浏览器进入配置页
 
-2. **Wails 图形安装器** (`wails-installer/`)
-   - 使用 Wails v2 的桌面应用
-   - 原生窗口，无控制台
-   - 四步向导：欢迎 → 模式 → 适配器 → 进度
-   - 平台检测和自动架构选择
+2. **Web 配置服务** (`packages/config-server/`)
+   - Nuxt 全栈应用，常驻后台运行
+   - 浏览器访问 `http://localhost:18080`
+   - 四个页面：仪表盘、API 配置、IM 适配器、日志
+   - 仪表盘整合：服务状态/启停、Token 用量统计、版本信息
 
-3. **Web 配置界面** (`frontend/`)
-   - 单文件 HTML/CSS/JS 应用
-   - 无需构建步骤
-   - 由嵌入式 HTTP 服务器提供
-   - 配置验证和预览
+3. **共享包** (`packages/shared/`)
+   - 共享 Vue 组件、TypeScript 类型、工具函数
+   - 被安装器和配置服务共同引用
 
-4. **自动更新器** (`updater/`)
-   - 后台更新检查
-   - 增量更新减少下载
-   - 失败时支持回滚
-   - 各平台专用更新机制
+### 后台服务托管
 
-### 构建系统
+| 平台 | 机制 | 说明 |
+|------|------|------|
+| Windows | Windows Service | 开机自启 |
+| macOS | launchd plist | 开机自启 |
+| Linux | systemd service | 开机自启 |
 
-- **主构建**: `scripts/build.sh` - 主要协调
-- **平台专用**: `scripts/build-{windows,macos,linux}.sh`
-- **Wails**: `wails-installer/build.sh` - GUI 应用构建
-- **发布**: `scripts/create-release.sh` - 打包创建
+### 数据存储
 
-### 配置流程
+配置以 JSON 文件存储：
+- Windows: `%APPDATA%\OpenClaw\config.json`
+- macOS: `~/Library/Application Support/OpenClaw/config.json`
+- Linux: `~/.config/openclaw/config.json`
 
-1. 用户运行安装器 (CLI 或 GUI)
-2. 自动检测平台和架构
-3. 选择安装模式 (系统/用户/便携)
-4. 自定义适配器配置
-5. 文件安装到目标目录
-6. 更新 PATH (系统/用户)
-7. 创建快捷方式 (平台专用)
-8. 注册服务 (Linux/macOS 可选)
+### 跨平台打包
+
+| 平台 | 安装器格式 | 配置服务 |
+|------|-----------|---------|
+| Windows amd64/arm64 | `.exe` (NSIS) | Node.js 服务 + Windows Service |
+| macOS Intel/Apple Silicon | `.dmg` | Node.js 服务 + launchd |
+| Linux amd64/arm64 | `.AppImage` / `.deb` | Node.js 服务 + systemd |
+
+## 网络连通性策略
+
+目标用户在中国大陆，安装和使用过程中不依赖境内无法访问的服务。
+
+- **安装过程完全离线**: 安装包内嵌所有依赖，零网络请求
+- **不使用境外 CDN**: 字体、图标、CSS 全部打包在本地
+- **npm 镜像**: `.npmrc` 配置 `registry=https://registry.npmmirror.com`
+- **Electron 镜像**: `ELECTRON_MIRROR=https://npmmirror.com/mirrors/electron/`
+- **更新检查**: 使用国内可达的服务器，不依赖 GitHub API
 
 ## 开发工作流
 
@@ -173,46 +167,25 @@ go test -v -run TestInstaller ./...
 
 1. **先写测试** - 遵循 TDD 方法
 2. **实现功能** - 平台专用代码保持隔离
-3. **本地测试** - 使用 `./scripts/build.sh` 快速迭代
-4. **更新文档** - 用户可见更改更新 USER_GUIDE.md
-5. **创建发布** - 用 `./scripts/create-release.sh --build` 验证
+3. **本地测试** - 开发模式快速迭代
+4. **更新文档** - 用户可见更改同步更新文档
+5. **构建验证** - 确保各平台打包正常
 
 ### 添加 IM 适配器
 
 1. 在 `adapters/<name>/adapter.json` 创建适配器配置
 2. 在 `adapters/<name>/` 添加配置模板
-3. 如需自定义逻辑，更新 `installer/config.go`
-4. 在 `installer/config_test.go` 添加测试
+3. 在 `packages/config-server/` 添加适配器配置页面逻辑
+4. 添加测试
 5. 更新文档
-
-### 平台专用更改
-
-- 使用 `internal/platform/` 进行平台抽象
-- 使用构建标签分离平台代码
-- 在目标平台测试或使用 Docker 构建 Linux
 
 ## 测试策略
 
 ### 单元测试
 
-- 位置: 源文件旁的 `*_test.go`
-- 运行: `go test ./...`
+- 位置: 源文件旁的 `*.test.ts` / `*.spec.ts`
+- 运行: `pnpm test`
 - 覆盖率目标: 70%+
-
-### 集成测试
-
-- 位置: `integration_test.go`
-- 运行: `go test -tags=integration`
-- 测试端到端安装流程
-
-### 手动测试
-
-1. 为目标平台构建
-2. 复制到测试机或虚拟机
-3. 测试全新安装
-4. 测试升级路径
-5. 测试卸载
-6. 验证服务状态 (Linux/macOS)
 
 ### 平台测试矩阵
 
@@ -225,63 +198,40 @@ go test -v -run TestInstaller ./...
 | Ubuntu 22.04 | amd64 | ✓ | ✓ | ✓ |
 | Ubuntu 22.04 | arm64 | ✓ | ✓ | ✓ |
 
-## 部署
+## 文档规划
 
-### U 盘部署
+面向计算机小白，以清晰文字为主，关键步骤配图。
 
-1. 运行 `./scripts/create-release.sh`
-2. 将 `release/OpenClaw-v1.0.0/` 复制到 U 盘
-3. U 盘结构：
-   ```
-   /OpenClaw/
-   ├── windows/
-   ├── macos/
-   ├── linux/
-   ├── shared/
-   └── README.txt
-   ```
-4. 用户运行对应平台的安装脚本
+| 文档 | 内容 |
+|------|------|
+| **快速上手指南** | 从下载到配置完成的完整流程 |
+| **Windows 安装 SOP** | Windows 下安装全流程 |
+| **macOS 安装 SOP** | macOS 下安装全流程，含系统安全提示处理（配图） |
+| **Linux 安装 SOP** | Linux 下安装全流程 |
+| **配置指南** | Web 配置界面各页面操作说明 |
+| **常见问题 FAQ** | 安装失败、配置不生效等常见问题 |
 
-### 网络部署
-
-1. 上传发布包到分发服务器
-2. 更新自动更新器的版本清单
-3. 通知用户新版本
-
-### 代码签名
-
-**macOS** (见 `docs/macos-signing.md`)：
-```bash
-./scripts/sign-macos.sh --cert "Developer ID" \
-  --input dist/openclaw-installer-darwin-amd64 \
-  --output dist/openclaw-installer-darwin-amd64-signed
-```
-
-**Windows**: 使用 `signtool.exe` 和代码签名证书
-
-## 关键依赖
-
-- **Go 1.22+**: 主要语言
-- **Wails v2**: 桌面 GUI 框架
-- **WebView2**: Windows 网页引擎 (需要运行时)
+**文档原则：**
+- 以文字为主，描述清晰准确
+- 只在关键易混淆步骤配图
+- 零术语，用大白话描述
+- 覆盖常见错误场景
 
 ## CI/CD
 
 GitHub Actions 工作流在 `.github/workflows/`：
-- 推送/PR 时构建
-- 跨平台测试
+- 推送/PR 时构建和测试
+- 跨平台打包
 - 标签推送时自动创建发布
 
-## 资源
+## 设计文档
 
-- **用户指南**: `docs/USER_GUIDE.md` (中文)
-- **架构文档**: `docs/architecture.md`
-- **构建指南**: `BUILD.md`
-- **测试计划**: `docs/TEST_PLAN.md`
+- **安装器重构设计**: `docs/plans/2026-03-01-installer-redesign-design.md`
 
 ## 注意事项
 
 - 所有面向用户的文档均为中文
-- 构建脚本支持 `VERSION` 环境变量
-- `dist/` 和 `release/` 包含大文件 - 使用 `.gitignore`
-- U 盘模板文件应保持精简以加快复制速度
+- 目标用户是计算机小白，UI 和文档需极简易懂
+- `dist/` 和 `build/` 包含构建产物，已 gitignore
+- 安装过程零网络请求，所有依赖内嵌
+- 构建时使用 npmmirror 镜像源
