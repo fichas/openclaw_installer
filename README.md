@@ -2,130 +2,131 @@
 
 跨平台 OpenClaw AI 助手安装器，支持企业微信、钉钉、飞书适配器配置。
 
+## 功能特性
+
+- **跨平台支持**: Windows、macOS、Linux (x64 / ARM64)
+- **双模式安装**:
+  - 🖥️ **Wails GUI** - 图形化一键安装
+  - ⌨️ **命令行** - 轻量级 Web 配置界面
+- **离线部署**: 从 U 盘直接安装，无需网络
+- **自动更新**: 内置更新系统
+- **预配置适配器**: 企业微信、钉钉、飞书
+
 ## 快速开始
 
-### 1. 准备 U 盘
+### 方式一：Wails 图形安装器（推荐）
 
-将 `usb-deploy/OpenClaw/` 目录复制到 U 盘根目录：
-```bash
-cp -r usb-deploy/OpenClaw/* /mnt/usb/
-```
-
-### 2. 运行安装器
-
-**Windows:**
-- 插入 U 盘，自动弹出安装界面
-- 或手动运行 `install.bat`
-
-**macOS:**
-```bash
-/Volumes/USB/OpenClaw/autorun/install-mac.command
-```
-
-**Linux:**
-```bash
-sudo /media/user/USB/OpenClaw/installers/openclaw-installer-linux-amd64
-```
-
-### 3. 配置界面
-
-安装器启动后自动打开浏览器访问 `http://localhost:18080`
-
-## 配置流程
-
-### Step 1: 基础配置
-| 字段 | 说明 | 示例 |
-|------|------|------|
-| AI 模型 | 选择模型提供商 | `anthropic/claude-opus-4-6` |
-| API Key | 模型提供商的 API Key | `sk-ant-...` |
-| Gateway 端口 | 服务监听端口 | `18080` |
-
-### Step 2: 企业微信配置
-| 字段 | 获取位置 |
-|------|----------|
-| CorpID | 企业微信管理后台 > 我的企业 > 企业ID |
-| AgentID | 应用管理 > 自建应用 > AgentId |
-| Secret | 应用详情 > Secret |
-| Token | 接收消息 > Token |
-| EncodingAESKey | 接收消息 > EncodingAESKey |
-
-### Step 3: 钉钉配置
-| 字段 | 获取位置 |
-|------|----------|
-| AppKey | 开发者后台 > 应用详情 |
-| AppSecret | 应用详情 |
-| Webhook | 群机器人设置 |
-
-### Step 4: 飞书配置
-| 字段 | 获取位置 |
-|------|----------|
-| AppID | 开发者平台 > 应用凭证 |
-| AppSecret | 应用凭证 |
-| Encrypt Key | 事件订阅 > Encrypt Key |
-
-## 启动 OpenClaw
+下载对应平台的安装器，双击运行：
 
 ```bash
-# 启动 Gateway
-openclaw gateway --port 18789
+# Windows
+./OpenClaw-Installer.exe
 
-# 发送测试消息
-openclaw agent --message "你好"
+# macOS
+./OpenClaw-Installer.app
 
-# 查看状态
-openclaw doctor
+# Linux
+./openclaw-installer
 ```
 
-## 命令行参数
+### 方式二：U 盘离线安装
 
-| 参数 | 说明 | 示例 |
-|------|------|------|
-| `--port` | 指定端口 | `--port 18080` |
-| `--no-browser` | 不自动打开浏览器 | `--no-browser` |
-| `--debug` | 调试模式 | `--debug` |
-
-## 故障排除
-
-### 浏览器未自动打开
-手动访问：`http://localhost:18080`
-
-### 端口被占用
-```bash
-./openclaw-installer --port 18081
-```
-
-### 配置验证失败
-- 检查 API Key 是否正确
-- 确认 Secret 未过期
-- 查看日志 `~/.openclaw/logs/`
-
-## 更新系统
+1. 从 [Releases](../../releases) 下载 `OpenClaw-v1.0.0.zip`
+2. 解压到 U 盘根目录
+3. 插入目标电脑，运行对应脚本：
 
 ```bash
-# 检查更新
-openclaw-update check
+# Windows - 右键以管理员运行
+.\install.ps1
 
-# 执行更新
-openclaw-update -yes
+# macOS
+./install-mac.command
 
-# 回滚版本
-openclaw-update -rollback
+# Linux
+sudo ./install-linux.sh
 ```
 
-## 系统支持
+### 方式三：从源码构建
 
-| 平台 | 架构 | 状态 |
-|------|------|------|
-| Windows | x64, ARM64 | ✅ |
-| macOS | x64, ARM64 | ✅ |
-| Linux | x64, ARM64 | ✅ |
+```bash
+# 克隆仓库
+git clone https://github.com/yourusername/openclaw-installer.git
+cd openclaw-installer
+
+# 构建命令行安装器
+./scripts/build.sh all
+
+# 或构建 Wails GUI
+cd wails-installer && ./build.sh
+```
+
+## 配置界面
+
+安装器启动后会自动打开配置界面：
+
+- **Web 配置**: `http://localhost:18080`
+- **配置项**:
+  - AI 模型设置 (API Key、模型选择)
+  - 企业微信 (CorpID、AgentID、Secret)
+  - 钉钉 (AppKey、AppSecret)
+  - 飞书 (AppID、AppSecret)
+
+## 项目结构
+
+```
+openclaw-installer/
+├── installer/          # 命令行安装器 (Go)
+├── wails-installer/    # Wails 图形安装器
+├── updater/            # 自动更新系统
+├── usb-template/       # U 盘部署模板
+├── adapters/           # IM 适配器配置
+├── scripts/            # 构建脚本
+├── docs/               # 文档
+└── release/            # 发布包模板
+```
+
+## 开发
+
+### 构建
+
+```bash
+# 构建所有平台
+./scripts/build.sh all
+
+# 构建指定平台
+./scripts/build.sh windows    # 或 macos / linux
+
+# 构建 Wails GUI
+cd wails-installer && ./build.sh
+```
+
+### 测试
+
+```bash
+cd installer
+go test -v ./...
+```
+
+### 创建发布
+
+```bash
+./scripts/create-release.sh
+```
+
+## 系统要求
+
+| 平台 | 最低版本 | 架构 |
+|------|---------|------|
+| Windows | Windows 10 | x64, ARM64 |
+| macOS | macOS 10.15 (Catalina) | Intel, Apple Silicon |
+| Linux | Ubuntu 18.04 / CentOS 7 | x64, ARM64 |
 
 ## 文档
 
-- [详细构建文档](BUILD.md)
-- [架构设计](docs/architecture.md)
-- [使用文档](docs/USAGE.md)
-- [测试报告](docs/TEST_REPORT.md)
+- [用户指南](docs/USER_GUIDE.md) - 详细安装和配置说明
+- [构建指南](BUILD.md) - 开发和构建文档
+- [架构设计](docs/architecture.md) - 系统设计文档
+- [CLAUDE.md](CLAUDE.md) - 项目上下文和开发规范
 
 ## 许可证
 
