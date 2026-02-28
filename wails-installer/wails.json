@@ -6,8 +6,7 @@
     "dir": "./frontend/dist",
     "install": "echo 'No build required for static HTML'",
     "build": "echo 'No build required for static HTML'",
-    "package": "echo 'No build required for static HTML'",
-    "wailsjsdir": "./frontend/src"
+    "package": "echo 'No build required for static HTML'"
   },
   "author": {
     "name": "OpenClaw Team",
