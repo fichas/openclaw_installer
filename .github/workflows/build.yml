@@ -55,7 +55,11 @@ jobs:
       - uses: actions/upload-artifact@v4
         with:
           name: installer-${{ matrix.targets }}
-          path: packages/installer/release/*
+          path: |
+            packages/installer/release/*.exe
+            packages/installer/release/*.dmg
+            packages/installer/release/*.deb
+            packages/installer/release/*.AppImage
 
   build-config-server:
     needs: test
