@@ -124,8 +124,11 @@ go test -v ./...
 ## 文档
 
 - [用户指南](docs/USER_GUIDE.md) - 详细安装和配置说明
+- [使用文档](docs/USAGE.md) - 安装器使用指南
+- [测试计划](docs/TEST_PLAN.md) - 安装器测试计划
 - [构建指南](BUILD.md) - 开发和构建文档
 - [架构设计](docs/architecture.md) - 系统设计文档
+- [用户体验设计](docs/ux-design.md) - UI/UX 设计规范
 - [CLAUDE.md](CLAUDE.md) - 项目上下文和开发规范
 
 ## 许可证
