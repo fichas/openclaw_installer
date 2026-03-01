@@ -1,6 +1,13 @@
 export default defineNuxtConfig({
   ssr: false,
   modules: ['nuxt-electron'],
+  router: {
+    options: {
+      // Electron runs on file:// in production; hash mode avoids Windows absolute
+      // paths being interpreted as route paths (e.g. /C:/.../index.html -> 404).
+      hashMode: true,
+    },
+  },
   electron: {
     build: [
       { entry: 'electron/main.ts' },

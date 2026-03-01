@@ -97,7 +97,8 @@ function createWindow() {
   if (process.env.VITE_DEV_SERVER_URL) {
     mainWindow.loadURL(process.env.VITE_DEV_SERVER_URL)
   } else {
-    mainWindow.loadFile(path.join(__dirname, '../.output/public/index.html'))
+    // Ensure the initial route resolves to "/" when loaded via file://.
+    mainWindow.loadFile(path.join(__dirname, '../.output/public/index.html'), { hash: '/' })
   }
 
   mainWindow.on('closed', () => {
