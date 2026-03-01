@@ -102,11 +102,25 @@ jobs:
       - uses: actions/download-artifact@v4
         with:
           path: artifacts/
+      - name: Package config-server artifact
+        run: |
+          tar -czf artifacts/config-server.tar.gz -C artifacts/config-server .
       - name: Create nightly tag
         if: github.ref == 'refs/heads/master'
         run: |
           git tag -f nightly
           git push -f origin nightly
+      - name: Cleanup previous nightly assets
+        if: github.ref == 'refs/heads/master'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set -e
+          if gh release view nightly >/dev/null 2>&1; then
+            gh release view nightly --json assets --jq '.assets[].name' | while read -r name; do
+              gh release delete-asset nightly "$name" --yes
+            done
+          fi
       - name: Create Release
         uses: softprops/action-gh-release@v2
         with:
@@ -114,4 +128,10 @@ jobs:
           name: ${{ startsWith(github.ref, 'refs/tags/') && github.ref_name || 'Nightly Build' }}
           prerelease: ${{ github.ref == 'refs/heads/master' }}
           generate_release_notes: true
-          files: artifacts/**/*
+          overwrite_files: true
+          files: |
+            artifacts/installer-linux/*.deb
+            artifacts/installer-linux/*.AppImage
+            artifacts/installer-mac/*.dmg
+            artifacts/installer-win/*.exe
+            artifacts/config-server.tar.gz
