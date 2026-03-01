@@ -104,7 +104,14 @@ jobs:
           path: artifacts/
       - name: Package config-server artifact
         run: |
-          tar -czf artifacts/config-server.tar.gz -C artifacts/config-server .
+          set -e
+          CONFIG_OUTPUT_DIR="$(find artifacts -type d -name '.output' | head -n 1 || true)"
+          if [ -z "$CONFIG_OUTPUT_DIR" ]; then
+            echo "Cannot find config-server .output directory under artifacts/"
+            find artifacts -maxdepth 4 -type d -print
+            exit 1
+          fi
+          tar -czf artifacts/config-server.tar.gz -C "$CONFIG_OUTPUT_DIR" .
       - name: Create nightly tag
         if: github.ref == 'refs/heads/master'
         run: |
